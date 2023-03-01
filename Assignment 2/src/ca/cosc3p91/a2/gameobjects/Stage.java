@@ -2,33 +2,33 @@ package ca.cosc3p91.a2.gameobjects;
 
 abstract class Stage {
 
-  protected int dHealth;
+    protected int dHealth;
 
-  protected int goldCost;
+    protected int goldCost;
 
-  protected int requiredVillageLevel;
+    protected int requiredVillageLevel;
 
-  protected int upgradeTime;
+    protected int upgradeTime;
 
-  protected int ironCost;
+    protected int ironCost;
 
-  protected int woodCost;
+    protected int woodCost;
 
-  public Building building;
+    public Building building;
 
-  public void getHealthChange() {
-  }
+    public void getHealthChange() {
+    }
 
-  public int getCost(String type) {
-    return 0;
-  }
+    public int getCost(String type) {
+        return 0;
+    }
 
-  public int getRequiredVillageLevel() {
-    return requiredVillageLevel;
-  }
+    public int getRequiredVillageLevel() {
+        return requiredVillageLevel;
+    }
 
-  public int getUpgradeTime() {
-    return upgradeTime;
-  }
+    public int getUpgradeTime() {
+        return upgradeTime;
+    }
 
 }

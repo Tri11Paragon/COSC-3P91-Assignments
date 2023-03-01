@@ -4,26 +4,30 @@ import ca.cosc3p91.a2.player.Player;
 
 public class GameEngine implements Runnable {
 
-  private Player player;
+    private final boolean running = true;
 
-  private int pillageFactor;
+    private Player player;
 
-  private int currentTime;
+    private int pillageFactor;
 
-  public Map map;
+    private int currentTime;
 
-  public void attackVIllage(Map map) {
-  }
+    public Map map;
 
-  public Map generateMap() {
-    return null;
-  }
+    public void attackVIllage(Map map) {
+    }
 
-  public void getScore(Map map) {
-  }
+    public Map generateMap() {
+        return null;
+    }
 
-  @Override
-  public void run() {
-    
-  }
+    public void getScore(Map map) {
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+
+        }
+    }
 }

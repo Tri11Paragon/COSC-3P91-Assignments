@@ -4,10 +4,10 @@ import java.util.List;
 
 public class Tile {
 
-  public int x;
+    public int x;
 
-  public int y;
+    public int y;
 
-  public List<Building> building;
+    public List<Building> building;
 
 }
