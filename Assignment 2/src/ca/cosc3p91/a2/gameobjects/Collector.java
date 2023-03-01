@@ -2,10 +2,10 @@ package ca.cosc3p91.a2.gameobjects;
 
 public class Collector {
 
-  private int averageCollectionRate;
+    private int averageCollectionRate;
 
-  public int getCollectionRate() {
-    return averageCollectionRate;
-  }
+    public int getCollectionRate() {
+        return averageCollectionRate;
+    }
 
 }

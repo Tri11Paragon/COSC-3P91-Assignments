@@ -7,14 +7,15 @@ import ca.cosc3p91.a2.player.Player;
 
 public class GameEngine implements Runnable {
 
-  private Player player;
+    private final boolean running = true;
 
-  private int pillageFactor;
+    private Player player;
 
-  private int currentTime;
+    private int pillageFactor;
 
-  public Map map;
+    private int currentTime;
 
+<<<<<<< HEAD
   public GameEngine () {
     player = new Player();
     VillageStage vInitialStage = new VillageStage(100,0,2,30,0,
@@ -32,16 +33,24 @@ public class GameEngine implements Runnable {
 
   public void attackVillage(Map map) {
   }
+=======
+    public Map map;
+>>>>>>> abf784868daa920a9ca8b3b9d291a7cf521aa9c7
 
-  public Map generateMap() {
-    return null;
-  }
+    public void attackVIllage(Map map) {
+    }
 
-  public void getScore(Map map) {
-  }
+    public Map generateMap() {
+        return null;
+    }
 
-  @Override
-  public void run() {
-    
-  }
+    public void getScore(Map map) {
+    }
+
+    @Override
+    public void run() {
+        while (running) {
+
+        }
+    }
 }

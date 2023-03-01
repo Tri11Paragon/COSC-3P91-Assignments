@@ -7,12 +7,12 @@ public class Farm extends ResourceBuilding {
     upgrade(baseStage);
   }
 
-  public int getPopulationContribution() {
-    return 0;
-  }
+    public int getPopulationContribution() {
+        return 0;
+    }
 
-  @Override
-  public void harvest(Village_Hall hall) {
+    @Override
+    public void harvest(Village_Hall hall) {
 
-  }
+    }
 }
