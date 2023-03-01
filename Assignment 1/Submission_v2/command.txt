@@ -1,0 +1,4 @@
+#!/bin/bash
+mkdir compiled
+cd code
+javac -verbose -d ../compiled game/GameEngine.java
