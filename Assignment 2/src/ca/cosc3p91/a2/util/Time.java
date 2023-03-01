@@ -4,12 +4,16 @@ public class Time {
 
     private long timeSeconds;
 
+    public Time() {
+        this.timeSeconds = 0;
+    }
+
     protected Time(long timeSeconds) {
         this.timeSeconds = timeSeconds;
     }
 
-    public Time offsetSeconds(long seconds){
-        timeSeconds += seconds;
+    public Time offsetSeconds(long seconds) {
+        this.timeSeconds += seconds;
         return this;
     }
 
@@ -21,27 +25,31 @@ public class Time {
         return offsetMinutes(hours * 60);
     }
 
-    public Time offsetDays(long days){
+    public Time offsetDays(long days) {
         return offsetHours(days * 24);
     }
 
-    public long get(){
+    public Time offsetTime(Time time) {
+        return offsetSeconds(time.timeSeconds);
+    }
+
+    public long get() {
         return timeSeconds;
     }
 
     public static class FutureTime {
         private final Time futureTime;
 
-        public FutureTime(Time futureTime){
+        public FutureTime(Time futureTime) {
             this.futureTime = futureTime;
         }
 
-        public boolean occurred(){
+        public boolean occurred() {
             return getTime().timeSeconds >= futureTime.timeSeconds;
         }
     }
 
-    public static Time getTime(){
+    public static Time getTime() {
         return new Time(System.currentTimeMillis() / 1000);
     }
 
