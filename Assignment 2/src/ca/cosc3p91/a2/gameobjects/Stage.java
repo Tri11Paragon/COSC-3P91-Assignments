@@ -14,13 +14,22 @@ abstract class Stage {
 
   protected int woodCost;
 
-  public Building building;
+  public Stage(int dHealth, int goldCost, int requiredVillageLevel, int upgradeTime, int ironCost, int woodCost) {
+    this.dHealth = dHealth;
+    this.goldCost = goldCost;
+    this.requiredVillageLevel = requiredVillageLevel;
+    this.upgradeTime = upgradeTime;
+    this.ironCost = ironCost;
+    this.woodCost = woodCost;
+  }
 
-  public void getHealthChange() {
+  public int getHealthChange() {
+    return dHealth;
   }
 
   public int getCost(String type) {
-    return 0;
+    return (type.equals("gold"))?(goldCost):
+            (type.equals("iron"))?(ironCost):woodCost;
   }
 
   public int getRequiredVillageLevel() {

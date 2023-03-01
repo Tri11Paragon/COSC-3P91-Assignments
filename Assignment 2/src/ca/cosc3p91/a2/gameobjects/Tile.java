@@ -8,6 +8,4 @@ public class Tile {
 
   public int y;
 
-  public List<Building> building;
-
 }

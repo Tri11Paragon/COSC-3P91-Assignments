@@ -1,27 +1,25 @@
 package ca.cosc3p91.a2.gameobjects;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public abstract class Building {
 
-  private static int level;
-
+  // members
+  private int level;
   private int health;
 
-  private static Stage stages;
+  private Stage stage;
 
   private int goldCost;
-
   private int ironCost;
-
   private int woodCost;
 
   private int buildTime;
 
-  public List<Stage> stage;
-  public Tile tile;
+  public ArrayList<Tile> tiles = new ArrayList<>();
+  public ArrayList<Inhabitant> inhabitants = new ArrayList<>();
 
-  public List<Inhabitant> inhabitant;
+  // functions
 
   public int getLevel() {
     return level;
@@ -32,19 +30,40 @@ public abstract class Building {
   }
 
   public int getCost(String type) {
-    return 0;
+    return (type.equals("gold"))?(goldCost):
+            (type.equals("iron"))?(ironCost):woodCost;
+  }
+
+  public Stage getStage() {
+    return stage;
   }
 
   public int getUpgradeCost() {
     return 0;
   }
 
-  public void upgrade() {
+  public void setLevel(int level) {
+    this.level = level;
+  }
 
+  public void setHealth(int health) {
+    this.health = health;
+  }
+
+  public void setStage(Stage stage) {this.stage = stage; }
+
+  public void addInhabitant(Inhabitant newMember) {
+    inhabitants.add(newMember);
+    // newMember.setBuilding(this);
+  }
+
+  public void upgrade(Stage stage) {
+    this.stage = stage;
+    this.health += stage.dHealth;
+    // interact with the timer regarding Upgrade time
   }
 
   public int getBuildTime() {
-    return 0;
+    return buildTime;
   }
-
 }
