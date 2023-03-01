@@ -2,7 +2,7 @@ package ca.cosc3p91.a2.game;
 
 import ca.cosc3p91.a2.player.Player;
 
-public class GameEngine {
+public class GameEngine implements Runnable {
 
   private Player player;
 
@@ -22,4 +22,8 @@ public class GameEngine {
   public void getScore(Map map) {
   }
 
+  @Override
+  public void run() {
+    
+  }
 }
