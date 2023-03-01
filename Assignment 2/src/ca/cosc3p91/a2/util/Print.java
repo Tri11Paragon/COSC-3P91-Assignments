@@ -36,18 +36,17 @@ public class Print {
     private final ArrayList<Row> rows = new ArrayList<>();
     private final ArrayList<Column> columns = new ArrayList<>();
 
-    private String tableName;
-    private int columnPadding;
+    private final String tableName;
+    private final int columnPadding;
     private int maxColumnWidth;
 
-    public Print(String tableName, int columnPadding, int maxColumnWidth){
+    public Print(String tableName, int columnPadding){
         this.tableName = tableName;
         this.columnPadding = columnPadding;
-        this.maxColumnWidth = maxColumnWidth;
     }
 
     public Print(){
-        this("", 2, 500);
+        this("", 2);
     }
 
     private String createPadding(int amount) {

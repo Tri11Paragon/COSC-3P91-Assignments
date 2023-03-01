@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args) {
         GameEngine engine = new GameEngine();
 
-        Print test = new Print("Hello There", 2, 500);
+        Print test = new Print("Hello There", 2);
 
         test.addColumn(new Print.Column("I am value 1"));
         test.addColumn(new Print.Column("Super Value"));
