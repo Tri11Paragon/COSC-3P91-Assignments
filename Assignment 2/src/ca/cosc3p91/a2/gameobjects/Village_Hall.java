@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 public class Village_Hall extends Building {
 
-<<<<<<< HEAD
   private int goldCapacity = 0;
 
   private int ironCapacity = 0;
@@ -35,24 +34,5 @@ public class Village_Hall extends Building {
   public int getWoodCapacity() {
     return woodCapacity;
   }
-=======
-    private int goldCapacity;
-
-    private int ironCapacity;
-
-    private int woodCapacity;
-
-    public int getGoldCapacity() {
-        return goldCapacity;
-    }
-
-    public int getIronCapacity() {
-        return ironCapacity;
-    }
-
-    public int getWoodCapacity() {
-        return woodCapacity;
-    }
->>>>>>> abf784868daa920a9ca8b3b9d291a7cf521aa9c7
 
 }

@@ -2,13 +2,12 @@ package ca.cosc3p91.a2.gameobjects;
 
 public class VillageStage extends Stage {
 
-    protected int goldCapacityIncrease;
+  protected int goldCapacityIncrease;
 
-    protected int ironCapacityIncrease;
+  protected int ironCapacityIncrease;
 
-    protected int woodCapacityIncrease;
+  protected int woodCapacityIncrease;
 
-<<<<<<< HEAD
   public VillageStage(int dHealth, int goldCost, int requiredVillageLevel, int upgradeTime, int ironCost, int woodCost,
                       int goldCapIncrease, int ironCapIncrease, int woodCapIncrease) {
     super(dHealth,goldCost,requiredVillageLevel,upgradeTime,ironCost,woodCost);
@@ -20,18 +19,13 @@ public class VillageStage extends Stage {
   public int getGoldCapacityIncrease() {
     return goldCapacityIncrease;
   }
-=======
-    public int getGoldCapacityIncrease() {
-        return goldCapacityIncrease;
-    }
->>>>>>> abf784868daa920a9ca8b3b9d291a7cf521aa9c7
 
-    public int getIronCapacityIncrease() {
-        return ironCapacityIncrease;
-    }
+  public int getIronCapacityIncrease() {
+    return ironCapacityIncrease;
+  }
 
-    public int getWoodCapacityIncrease() {
-        return woodCapacityIncrease;
-    }
+  public int getWoodCapacityIncrease() {
+    return woodCapacityIncrease;
+  }
 
 }
