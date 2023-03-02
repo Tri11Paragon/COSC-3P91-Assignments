@@ -1,10 +1,10 @@
 package ca.cosc3p91.a2.gameobjects;
 
-public class GoldMine extends ResourceBuilding {
+public class SaulGoodMine extends ResourceBuilding {
 
   public static String resource = "gold";
 
-  public GoldMine (int lvl, ResourceStage baseStage) {
+  public SaulGoodMine(int lvl, ResourceStage baseStage) {
     setLevel(lvl);
     upgrade(baseStage);
   }
