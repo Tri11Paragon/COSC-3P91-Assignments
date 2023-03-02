@@ -181,11 +181,10 @@ public class Print {
             if (diff > 0) {
 
                 int left = (int) Math.floor(diff / 2.0);
+                int right = (int) Math.ceil(diff / 2.0);
 
                 int leftleft = (int) Math.floor(left / 2.0);
                 int leftright = (int) Math.ceil(left / 2.0);
-
-                int right = (int) Math.ceil(diff / 2.0);
 
                 int rightleft = (int) Math.floor(right / 2.0);
                 int rightright = (int) Math.ceil(right / 2.0);
