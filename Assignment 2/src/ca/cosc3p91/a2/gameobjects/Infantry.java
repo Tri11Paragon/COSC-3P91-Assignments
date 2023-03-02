@@ -1,6 +1,6 @@
 package ca.cosc3p91.a2.gameobjects;
 
-public abstract class Infantry {
+public abstract class Infantry implements Inhabitant {
 
     private int health;
 
@@ -8,16 +8,36 @@ public abstract class Infantry {
 
     private int range;
 
+    public Infantry(int hitPoints, int damage, int range) {
+        this.health = hitPoints;
+        this.damage = damage;
+        this.range = range;
+    }
+
     public void attack(Building b) {
     }
 
-    public void getHealth() {
+    public int getHealth() {
+        return health;
     }
 
-    public void getDamage() {
+    public int getDamage() {
+        return damage;
     }
 
-    public void getRange() {
+    public int getRange() {
+        return range;
     }
 
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public void setDamage(int damage) {
+        this.damage = damage;
+    }
+
+    public void setRange(int range) {
+        this.range = range;
+    }
 }

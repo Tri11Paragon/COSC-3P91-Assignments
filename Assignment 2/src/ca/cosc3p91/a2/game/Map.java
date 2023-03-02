@@ -33,7 +33,7 @@ public class Map {
 
   }
 
-  public void build(Village_Hall hall, Tile t, Building b) {
+  public void build(Tile t, Building b) {
     contains.add(b);
   }
 
