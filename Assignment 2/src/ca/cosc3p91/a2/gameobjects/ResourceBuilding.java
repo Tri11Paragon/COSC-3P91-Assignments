@@ -20,14 +20,14 @@ public abstract class ResourceBuilding extends Building {
         this.harvest_rate += stage.getHarvestRateIncrease();
     }
 
-    public void update(Village_Hall hall){
+    public void update(VillageHall hall){
         if (nextHarvestTime.occurred()){
             harvest(hall);
             nextHarvestTime = Time.getTime().offsetTime(harvestMinTime);
         }
     }
 
-    protected abstract void harvest(Village_Hall hall);
+    protected abstract void harvest(VillageHall hall);
 
     public int getHarvestRate(){
         return harvest_rate;

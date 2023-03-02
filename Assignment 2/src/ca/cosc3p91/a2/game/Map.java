@@ -9,7 +9,7 @@ public class Map {
 
     static int MAXSIZE = 400;
 
-    private Village_Hall townHall;
+    private VillageHall townHall;
 
     private int guardTime;
 
@@ -17,7 +17,7 @@ public class Map {
 
     public List<Inhabitant> inhabitants;
 
-    public Map(Village_Hall villageHall, int gTime) {
+    public Map(VillageHall villageHall, int gTime) {
         contains = new ArrayList<>();
         inhabitants = new ArrayList<>();
         this.townHall = villageHall;
@@ -43,6 +43,10 @@ public class Map {
 
     public void setGuardTime(int gTime) {
         this.guardTime = gTime;
+    }
+
+    public VillageHall getTownHall(){
+        return townHall;
     }
 
 }

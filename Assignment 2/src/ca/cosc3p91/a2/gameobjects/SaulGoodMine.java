@@ -1,7 +1,5 @@
 package ca.cosc3p91.a2.gameobjects;
 
-import ca.cosc3p91.a2.util.Time;
-
 public class SaulGoodMine extends ResourceBuilding {
 
     public static String resource = "gold";
@@ -12,7 +10,7 @@ public class SaulGoodMine extends ResourceBuilding {
     }
 
     @Override
-    public void harvest(Village_Hall hall) {
+    public void harvest(VillageHall hall) {
         hall.addCurrentGold(getHarvestRate());
     }
 }

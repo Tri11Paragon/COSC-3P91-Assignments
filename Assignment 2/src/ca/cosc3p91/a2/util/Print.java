@@ -1,6 +1,7 @@
 package ca.cosc3p91.a2.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Ported from blt::TableFormatter (C++)
@@ -19,13 +20,18 @@ public class Print {
             this.values = new ArrayList<>();
         }
 
+        public Row(String... values){
+            this();
+            this.values.addAll(Arrays.asList(values));
+        }
+
         public void add(String value) {
             values.add(value);
         }
     }
 
     public static class Column {
-        private final String columnName;
+        private String columnName;
         private long maxColumnLength = 0;
 
         public Column(String columnName) {
@@ -38,15 +44,21 @@ public class Print {
 
     private final String tableName;
     private final int columnPadding;
-    private int maxColumnWidth;
+    private int width;
+    private final int targetWidth;
 
-    public Print(String tableName, int columnPadding) {
+    public Print(String tableName, int columnPadding, int targetWidth) {
         this.tableName = tableName;
         this.columnPadding = columnPadding;
+        this.targetWidth = targetWidth;
     }
 
+    public Print(String tableName, int columnPadding){this(tableName, columnPadding, -1);}
+
+    public Print(String tableName){this(tableName, 2);}
+
     public Print() {
-        this("", 2);
+        this("");
     }
 
     private String createPadding(int amount) {
@@ -114,7 +126,7 @@ public class Print {
         StringBuilder wholeWidthSeparator = new StringBuilder();
         for (int i = 0; i < size; i++) {
             if (i == nextIndex) {
-                System.out.println(currentColumnIndex + " " + nextIndex + " " + size);
+                //System.out.println(currentColumnIndex + " " + nextIndex + " " + size);
                 int currentColumnSize = (int) (columns.get(currentColumnIndex++).maxColumnLength + columnPadding * 2);
                 nextIndex += currentColumnSize + 1;
                 wholeWidthSeparator.append('+');
@@ -130,7 +142,7 @@ public class Print {
             Column column = columns.get(i);
             column.maxColumnLength = column.columnName.length();
             for (Row row : rows) {
-                column.maxColumnLength = Math.max(column.maxColumnLength, row.values.get(i).length() - 1);
+                column.maxColumnLength = Math.max(column.maxColumnLength, row.values.get(i).length());
             }
         }
     }
@@ -159,11 +171,37 @@ public class Print {
     }
 
     public ArrayList<String> createTable(boolean top, boolean bottom, boolean separators) {
-        ArrayList<String> lines = new ArrayList<>();
-
         String header = generateColumnHeader();
         String topSeparator = generateTopSelector(header.length());
         String lineSeparator = generateSeparator(header.length() - 1);
+
+        if (targetWidth > 0) {
+            int diff = targetWidth - header.length();
+
+            if (diff > 0) {
+
+                int left = (int) Math.floor(diff / 2.0);
+
+                int leftleft = (int) Math.floor(left / 2.0);
+                int leftright = (int) Math.ceil(left / 2.0);
+
+                int right = (int) Math.ceil(diff / 2.0);
+
+                int rightleft = (int) Math.floor(right / 2.0);
+                int rightright = (int) Math.ceil(right / 2.0);
+
+                columns.get(0).columnName = createPadding(leftleft) + columns.get(0).columnName + createPadding(leftright);
+                columns.get(columns.size() - 1).columnName = createPadding(rightleft) + columns.get(columns.size() - 1).columnName + createPadding(rightright);
+
+                header = generateColumnHeader();
+                topSeparator = generateTopSelector(header.length());
+                lineSeparator = generateSeparator(header.length() - 1);
+            }
+        }
+
+        width = header.length();
+
+        ArrayList<String> lines = new ArrayList<>();
 
         if (top)
             lines.add(topSeparator);
@@ -198,6 +236,10 @@ public class Print {
 
     public ArrayList<String> createTable() {
         return createTable(true, true, true);
+    }
+
+    public int getWidth(){
+        return width;
     }
 
     public static void print(ArrayList<String> lines) {
