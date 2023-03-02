@@ -8,11 +8,9 @@ public class Farm extends ResourceBuilding {
     }
 
     public int getPopulationContribution() {
-        return 0;
+        return getHarvestRate();
     }
 
     @Override
-    public void harvest(Village_Hall hall) {
-
-    }
+    public void harvest(Village_Hall hall) {}
 }

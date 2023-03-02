@@ -37,16 +37,8 @@ public class Time {
         return timeSeconds;
     }
 
-    public static class FutureTime {
-        private final Time futureTime;
-
-        public FutureTime(Time futureTime) {
-            this.futureTime = futureTime;
-        }
-
-        public boolean occurred() {
-            return getTime().timeSeconds >= futureTime.timeSeconds;
-        }
+    public boolean occurred() {
+        return getTime().timeSeconds >= timeSeconds;
     }
 
     public static Time getTime() {

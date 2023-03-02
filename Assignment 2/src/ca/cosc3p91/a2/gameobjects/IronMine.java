@@ -11,6 +11,6 @@ public class IronMine extends ResourceBuilding {
 
     @Override
     public void harvest(Village_Hall hall) {
-
+        hall.addCurrentIron(getHarvestRate());
     }
 }

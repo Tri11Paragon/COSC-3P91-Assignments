@@ -10,7 +10,7 @@ public class LumberMine extends ResourceBuilding {
     }
 
     public void harvest(Village_Hall hall) {
-
+        hall.addCurrentWood(getHarvestRate());
     }
 
 }
