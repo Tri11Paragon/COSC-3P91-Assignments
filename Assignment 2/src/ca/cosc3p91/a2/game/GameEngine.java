@@ -5,47 +5,47 @@ import ca.cosc3p91.a2.player.*;
 
 public class GameEngine implements Runnable {
 
-  private Player player;
+    private Player player;
 
-  private int pillageFactor;
+    private int pillageFactor;
 
-  private int currentTime;
+    private int currentTime;
 
-  public Map map;
+    public Map map;
 
-  public GameEngine () {
-    player = new Player();
-    VillageStage vInitialStage = new VillageStage(100,0,2,30,0,
-            0, 12,12,12);
-    map = new Map(new Village_Hall(1,vInitialStage),30);
-  }
-
-  public void printState() {
-    // Print toPrint = new Print("~ Current Village Buildings ~",2);
-
-    System.out.println("In Map:\n");
-    System.out.println("\t~ Current Village Buildings ~\n");
-    for (Building b : map.contains) {
-      System.out.println("\t|> "+b.getClass().getSimpleName()+" lvl: "+b.getLevel()+" health: "+b.getHealth());
+    public GameEngine() {
+        player = new Player();
+        VillageStage vInitialStage = new VillageStage(100, 0, 2, 30, 0,
+                0, 12, 12, 12);
+        map = new Map(new Village_Hall(1, vInitialStage), 30);
     }
-    System.out.println("\n\t~ Current Village Inhabitants ~\n\n");
-    for (Inhabitant i : map.inhabitants) {
-      System.out.println("\t|> "+i.getClass().getSimpleName()+" lvl: "+i.getLevel());
+
+    public void printState() {
+        // Print toPrint = new Print("~ Current Village Buildings ~",2);
+
+        System.out.println("In Map:\n");
+        System.out.println("\t~ Current Village Buildings ~\n");
+        for (Building b : map.contains) {
+            System.out.println("\t|> " + b.getClass().getSimpleName() + " lvl: " + b.getLevel() + " health: " + b.getHealth());
+        }
+        System.out.println("\n\t~ Current Village Inhabitants ~\n\n");
+        for (Inhabitant i : map.inhabitants) {
+            System.out.println("\t|> " + i.getClass().getSimpleName() + " lvl: " + i.getLevel());
+        }
     }
-  }
 
-  public void attackVillage(Map map) {
-  }
+    public void attackVillage(Map map) {
+    }
 
-  public Map generateMap() {
-    return null;
-  }
+    public Map generateMap() {
+        return null;
+    }
 
-  public void getScore(Map map) {
-  }
+    public void getScore(Map map) {
+    }
 
-  @Override
-  public void run() {
+    @Override
+    public void run() {
 
-  }
+    }
 }

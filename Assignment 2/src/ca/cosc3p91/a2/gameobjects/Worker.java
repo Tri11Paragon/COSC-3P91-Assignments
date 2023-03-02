@@ -7,6 +7,7 @@ public class Worker implements Inhabitant {
     public void set_IsBuilding(boolean state) {
         currentlyBuilding = state;
     }
+
     public boolean isCurrentlyBuilding() {
         return currentlyBuilding;
     }

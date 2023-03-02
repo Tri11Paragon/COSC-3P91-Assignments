@@ -4,60 +4,60 @@ import java.util.ArrayList;
 
 public class Village_Hall extends Building {
 
-  private int goldCapacity = 0;
-  private int ironCapacity = 0;
-  private int woodCapacity = 0;
+    private int goldCapacity = 0;
+    private int ironCapacity = 0;
+    private int woodCapacity = 0;
 
-  private int currentGold;
-  private int currentIron;
-  private int currentWood;
+    private int currentGold;
+    private int currentIron;
+    private int currentWood;
 
-  public Village_Hall (int lvl, VillageStage baseStage) {
-    setLevel(lvl);
-    upgrade(baseStage);
-  }
+    public Village_Hall(int lvl, VillageStage baseStage) {
+        setLevel(lvl);
+        upgrade(baseStage);
+    }
 
-  public void upgrade(VillageStage stage) {
-    super.upgrade(stage);
-    this.goldCapacity += stage.getGoldCapacityIncrease();
-    this.ironCapacity += stage.getIronCapacityIncrease();
-    this.woodCapacity += stage.getWoodCapacityIncrease();
-  }
+    public void upgrade(VillageStage stage) {
+        super.upgrade(stage);
+        this.goldCapacity += stage.getGoldCapacityIncrease();
+        this.ironCapacity += stage.getIronCapacityIncrease();
+        this.woodCapacity += stage.getWoodCapacityIncrease();
+    }
 
 
-  public int getGoldCapacity() {
-    return goldCapacity;
-  }
+    public int getGoldCapacity() {
+        return goldCapacity;
+    }
 
-  public int getIronCapacity() {
-    return ironCapacity;
-  }
+    public int getIronCapacity() {
+        return ironCapacity;
+    }
 
-  public int getWoodCapacity() {
-    return woodCapacity;
-  }
+    public int getWoodCapacity() {
+        return woodCapacity;
+    }
 
-  public int getCurrentGold() {
-    return currentGold;
-  }
+    public int getCurrentGold() {
+        return currentGold;
+    }
 
-  public void addCurrentGold(int currentGold) {
-    this.currentGold += currentGold;
-  }
+    public void addCurrentGold(int currentGold) {
+        this.currentGold += currentGold;
+    }
 
-  public int getCurrentIron() {
-    return currentIron;
-  }
+    public int getCurrentIron() {
+        return currentIron;
+    }
 
-  public void addCurrentIron(int currentIron) {
-    this.currentIron += currentIron;
-  }
+    public void addCurrentIron(int currentIron) {
+        this.currentIron += currentIron;
+    }
 
-  public int getCurrentWood() {
-    return currentWood;
-  }
+    public int getCurrentWood() {
+        return currentWood;
+    }
 
-  public void addCurrentWood(int currentWood) {
-    this.currentWood += currentWood;
-  }
+    public void addCurrentWood(int currentWood) {
+        this.currentWood += currentWood;
+    }
 }

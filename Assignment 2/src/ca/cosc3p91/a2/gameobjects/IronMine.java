@@ -2,15 +2,15 @@ package ca.cosc3p91.a2.gameobjects;
 
 public class IronMine extends ResourceBuilding {
 
-  public static String resource = "iron";
+    public static String resource = "iron";
 
-  public IronMine (int lvl, ResourceStage baseStage) {
-    setLevel(lvl);
-    upgrade(baseStage);
-  }
+    public IronMine(int lvl, ResourceStage baseStage) {
+        setLevel(lvl);
+        upgrade(baseStage);
+    }
 
-  @Override
-  public void harvest(Village_Hall hall) {
+    @Override
+    public void harvest(Village_Hall hall) {
 
-  }
+    }
 }

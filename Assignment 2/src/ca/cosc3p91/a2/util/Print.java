@@ -15,11 +15,11 @@ public class Print {
             this.values = row;
         }
 
-        public Row(){
+        public Row() {
             this.values = new ArrayList<>();
         }
 
-        public void add(String value){
+        public void add(String value) {
             values.add(value);
         }
     }
@@ -28,7 +28,7 @@ public class Print {
         private final String columnName;
         private long maxColumnLength = 0;
 
-        public Column(String columnName){
+        public Column(String columnName) {
             this.columnName = columnName;
         }
     }
@@ -40,18 +40,18 @@ public class Print {
     private final int columnPadding;
     private int maxColumnWidth;
 
-    public Print(String tableName, int columnPadding){
+    public Print(String tableName, int columnPadding) {
         this.tableName = tableName;
         this.columnPadding = columnPadding;
     }
 
-    public Print(){
+    public Print() {
         this("", 2);
     }
 
     private String createPadding(int amount) {
         StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < amount; i++){
+        for (int i = 0; i < amount; i++) {
             builder.append(' ');
         }
         return builder.toString();
@@ -64,8 +64,8 @@ public class Print {
         StringBuilder halfWidthLeftSeparator = new StringBuilder();
         StringBuilder halfWidthRightSeparator = new StringBuilder();
 
-        long sizeNameFloor = (long) Math.floor((double)sizeNameRemoved / 2.0);
-        long sizeNameCeil = (long) Math.ceil((double)sizeNameRemoved / 2.0);
+        long sizeNameFloor = (long) Math.floor((double) sizeNameRemoved / 2.0);
+        long sizeNameCeil = (long) Math.ceil((double) sizeNameRemoved / 2.0);
 
         halfWidthLeftSeparator.append('+');
 
@@ -78,7 +78,7 @@ public class Print {
 
         StringBuilder separator = new StringBuilder();
         separator.append(halfWidthLeftSeparator.toString());
-        if (sizeOfName != 0){
+        if (sizeOfName != 0) {
             separator.append("{ ");
             separator.append(tableName);
             separator.append(" }");
@@ -87,20 +87,20 @@ public class Print {
         return separator.toString();
     }
 
-    private String generateColumnHeader(){
+    private String generateColumnHeader() {
         updateColumnLengths();
         StringBuilder header = new StringBuilder();
         header.append('|');
 
-        for (int i = 0; i < columns.size(); i++){
+        for (int i = 0; i < columns.size(); i++) {
             Column column = columns.get(i);
-            double columnPaddingLength = ((int)(column.maxColumnLength) - (int)(column.columnName.length()))/2.0;
-            header.append(createPadding((int)(columnPadding + (int)Math.floor(columnPaddingLength))));
+            double columnPaddingLength = ((int) (column.maxColumnLength) - (int) (column.columnName.length())) / 2.0;
+            header.append(createPadding((int) (columnPadding + (int) Math.floor(columnPaddingLength))));
 
             header.append(column.columnName);
 
-            header.append(createPadding((int)(columnPadding + (int)Math.ceil(columnPaddingLength))));
-            if (i < columns.size()-1)
+            header.append(createPadding((int) (columnPadding + (int) Math.ceil(columnPaddingLength))));
+            if (i < columns.size() - 1)
                 header.append('|');
         }
         header.append('|');
@@ -115,7 +115,7 @@ public class Print {
         for (int i = 0; i < size; i++) {
             if (i == nextIndex) {
                 System.out.println(currentColumnIndex + " " + nextIndex + " " + size);
-                int currentColumnSize = (int) (columns.get(currentColumnIndex++).maxColumnLength + columnPadding*2);
+                int currentColumnSize = (int) (columns.get(currentColumnIndex++).maxColumnLength + columnPadding * 2);
                 nextIndex += currentColumnSize + 1;
                 wholeWidthSeparator.append('+');
             } else
@@ -139,7 +139,7 @@ public class Print {
         return column.columnName.length() + columnPadding * 2L;
     }
 
-    public Print addColumn(Column column){
+    public Print addColumn(Column column) {
         columns.add(column);
         return this;
     }
@@ -154,11 +154,11 @@ public class Print {
         return this;
     }
 
-    public Print addRow(ArrayList<String> row){
+    public Print addRow(ArrayList<String> row) {
         return addRow(new Row(row));
     }
 
-    public ArrayList<String> createTable(boolean top, boolean bottom, boolean separators){
+    public ArrayList<String> createTable(boolean top, boolean bottom, boolean separators) {
         ArrayList<String> lines = new ArrayList<>();
 
         String header = generateColumnHeader();
@@ -174,13 +174,13 @@ public class Print {
         for (Row row : rows) {
             StringBuilder rowLine = new StringBuilder();
             rowLine.append('|');
-            for (int i = 0; i < row.values.size(); i++){
+            for (int i = 0; i < row.values.size(); i++) {
                 String value = row.values.get(i);
                 Column column = columns.get(i);
-                int spaceLeft = (int)(column.maxColumnLength - value.length());
-                rowLine.append(createPadding((int)Math.floor(spaceLeft / 2.0) + columnPadding));
+                int spaceLeft = (int) (column.maxColumnLength - value.length());
+                rowLine.append(createPadding((int) Math.floor(spaceLeft / 2.0) + columnPadding));
                 rowLine.append(value);
-                rowLine.append(createPadding((int)Math.ceil(spaceLeft / 2.0) + columnPadding));
+                rowLine.append(createPadding((int) Math.ceil(spaceLeft / 2.0) + columnPadding));
                 rowLine.append('|');
             }
             lines.add(rowLine.toString());
@@ -192,7 +192,7 @@ public class Print {
         return lines;
     }
 
-    public ArrayList<String> createBox(){
+    public ArrayList<String> createBox() {
         return new ArrayList<>();
     }
 
@@ -200,7 +200,7 @@ public class Print {
         return createTable(true, true, true);
     }
 
-    public static void print(ArrayList<String> lines){
+    public static void print(ArrayList<String> lines) {
         for (String line : lines)
             System.out.println(line);
     }
