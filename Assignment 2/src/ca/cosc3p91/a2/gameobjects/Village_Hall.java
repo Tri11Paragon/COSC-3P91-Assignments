@@ -5,10 +5,12 @@ import java.util.ArrayList;
 public class Village_Hall extends Building {
 
   private int goldCapacity = 0;
-
   private int ironCapacity = 0;
-
   private int woodCapacity = 0;
+
+  private int currentGold;
+  private int currentIron;
+  private int currentWood;
 
   public Village_Hall (int lvl, VillageStage baseStage) {
     setLevel(lvl);
@@ -35,4 +37,27 @@ public class Village_Hall extends Building {
     return woodCapacity;
   }
 
+  public int getCurrentGold() {
+    return currentGold;
+  }
+
+  public void addCurrentGold(int currentGold) {
+    this.currentGold += currentGold;
+  }
+
+  public int getCurrentIron() {
+    return currentIron;
+  }
+
+  public void addCurrentIron(int currentIron) {
+    this.currentIron += currentIron;
+  }
+
+  public int getCurrentWood() {
+    return currentWood;
+  }
+
+  public void addCurrentWood(int currentWood) {
+    this.currentWood += currentWood;
+  }
 }
