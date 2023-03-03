@@ -39,6 +39,12 @@ public class CasaDeNarino extends Building {
         return currentGold;
     }
 
+    public int getCurrentIron() {
+        return currentIron;
+    }
+
+    public int getCurrentWood() {return currentWood;}
+
     public boolean addGold(int amount) {
         int newGold = this.currentGold + amount;
         if (newGold <= goldCapacity && this.currentGold + amount >= 0){
@@ -48,10 +54,6 @@ public class CasaDeNarino extends Building {
         return false;
     }
 
-    public int getCurrentIron() {
-        return currentIron;
-    }
-
     public boolean addIron(int amount) {
         int newIron = this.currentIron + amount;
         if (newIron <= ironCapacity && newIron >= 0) {
@@ -59,10 +61,6 @@ public class CasaDeNarino extends Building {
             return true;
         }
         return false;
-    }
-
-    public int getCurrentWood() {
-        return currentWood;
     }
 
     public boolean addWood(int amount) {

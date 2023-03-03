@@ -77,9 +77,7 @@ public class GameEngine implements Runnable {
     }
 
     private Map generateInitialMap(){
-        VillageStage villageHallInitialStage = new VillageStage(100, 0, 2, new Time(), 0,
-                0, 1000, 2500, 5000);
-        return new Map(new CasaDeNarino(1, villageHallInitialStage), 30);
+        return new Map(new CasaDeNarino(1, VillageHallStages.villageStages[0]), 30);
     }
 
     public Map generateMap() {
@@ -111,6 +109,9 @@ public class GameEngine implements Runnable {
                     switch (in) {
                         case 'p':
                             printState();
+                            break;
+                        case 'q':
+                            System.exit(0);
                             break;
                         default:
                             break;
