@@ -4,10 +4,12 @@ import ca.cosc3p91.a2.gameobjects.*;
 import ca.cosc3p91.a2.player.*;
 import ca.cosc3p91.a2.util.Print;
 import ca.cosc3p91.a2.util.Time;
+import ca.cosc3p91.a2.util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Random;
 import java.util.Scanner;
 
 public class GameEngine implements Runnable {
@@ -23,11 +25,13 @@ public class GameEngine implements Runnable {
 
     private int currentTime;
 
+    private final Random random = new Random(System.nanoTime());
+
     public Map map;
 
     public GameEngine() {
         player = new Player();
-        map = generateMap();
+        map = generateInitialMap();
     }
 
     private void printState() {
@@ -86,7 +90,70 @@ public class GameEngine implements Runnable {
 
     public Map generateMap() {
         Map initialMap = generateInitialMap();
-        initialMap.getTownHall().upgrade(VillageHallStages.villageStages[this.map.getTownHall().getLevel()]);
+        // generate a similar town hall
+        int levelChange = random.nextInt(2) - 1;
+        int nextLevel = this.map.getTownHall().getLevel() + levelChange;
+        // only need to change if the new village level is higher than initial
+        if (nextLevel > 0)
+            initialMap.getTownHall().upgrade(VillageHallStages.villageStages[nextLevel]);
+
+        int buildingCount = this.map.contains.size();
+
+        int saulGoodMines = 0;
+        int ironMines = 0;
+        int woodMines = 0;
+        int archerTowers = 0;
+        int cannons = 0;
+
+        // count buildings in our map
+        for (Building b : this.map.contains){
+            if (b instanceof SaulGoodMine)
+                saulGoodMines++;
+            else if (b instanceof IronMine)
+                ironMines++;
+            else if (b instanceof LumberMine)
+                woodMines++;
+            else if (b instanceof ArcherTower)
+                archerTowers++;
+            else if (b instanceof  Cannon)
+                cannons++;
+        }
+
+        // variate
+        saulGoodMines += random.nextInt();;
+        ironMines += random.nextInt();
+        woodMines += random.nextInt();
+        archerTowers += random.nextInt();
+        cannons += random.nextInt();
+
+        // generate a map with a similar number of buildings
+        for (int i = 0; i < Math.max(buildingCount + random.nextInt(5) - 2, 1); i++) {
+            int selection = random.nextInt(5);
+            // select a random building. Doing it this way because if we build based on buildings we have
+            // then the maps will be VERY boring as they would be all the same
+            switch (selection) {
+                case 0:
+                    initialMap.contains.add(new LumberMine(ResourceStages.woodStages[random.nextInt(ResourceStages.woodStages.length)]));
+                    break;
+                case 1:
+                    if (ironMines > 0)
+                        initialMap.contains.add(new IronMine(ResourceStages.ironStages[random.nextInt(ResourceStages.ironStages.length)]));
+                    break;
+                case 2:
+                    if (saulGoodMines > 0)
+                        initialMap.contains.add(new SaulGoodMine(ResourceStages.goldStages[random.nextInt(ResourceStages.goldStages.length)]));
+                    break;
+                case 3:
+                    initialMap.contains.add(new ArcherTower());
+                    break;
+                case 4:
+                    initialMap.contains.add(new Cannon());
+                    break;
+                default:
+                    break;
+            }
+        }
+
         return initialMap;
     }
 
@@ -113,13 +180,27 @@ public class GameEngine implements Runnable {
             //System.out.println("Updating");
             try {
                 if (rd.ready()) {
-                    char in = sc.next().charAt(0);
-                    switch (in) {
+                    String in = sc.nextLine();
+                    String[] args = in.split(" ");
+                    System.out.println("Your Input: ");
+                    System.out.println("\t->" + in);
+                    switch (in.charAt(0)) {
                         case 'p':
                             printState();
                             break;
                         case 'q':
                             System.exit(0);
+                            break;
+                        case 'b':
+                            if (args.length < 2) {
+                                System.err.println("Args must include type!");
+                            } else {
+                                Building type = determineType(args[1]);
+                                if (type == null)
+                                    System.err.println("Args are not a valid building!");
+                                else
+                                    map.build(new Tile(), type);
+                            }
                             break;
                         default:
                             break;
@@ -129,5 +210,24 @@ public class GameEngine implements Runnable {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    private static Building determineType(String building){
+        building = building.toLowerCase();
+        char c = ' ';
+        if (building.trim().length() == 1)
+            c = building.charAt(0);
+        if (building.contains("gold") || building.contains("good") || c == 'g') {
+            return new SaulGoodMine(ResourceStages.goldStages[0]);
+        } else if (building.contains("iron") || c == 'i') {
+            return new IronMine(ResourceStages.ironStages[0]);
+        } else if (building.contains("wood") || building.contains("lumber") || c == 'w' || c == 'l') {
+            return new LumberMine(ResourceStages.woodStages[0]);
+        } else if (building.contains("archer") || c == 'a') {
+            return new ArcherTower();
+        } else if (building.contains("can") || c == 'c'){
+            return new Cannon();
+        }
+        return null;
     }
 }

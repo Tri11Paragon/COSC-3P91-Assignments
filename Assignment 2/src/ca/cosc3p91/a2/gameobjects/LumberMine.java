@@ -4,8 +4,7 @@ public class LumberMine extends ResourceBuilding {
 
     public static String resource = "wood";
 
-    public LumberMine(int lvl, ResourceStage baseStage) {
-        setLevel(lvl);
+    public LumberMine(ResourceStage baseStage) {
         upgrade(baseStage);
     }
 

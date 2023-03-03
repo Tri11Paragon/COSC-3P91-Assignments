@@ -4,8 +4,7 @@ public class SaulGoodMine extends ResourceBuilding {
 
     public static String resource = "gold";
 
-    public SaulGoodMine(int lvl, ResourceStage baseStage) {
-        setLevel(lvl);
+    public SaulGoodMine(ResourceStage baseStage) {
         upgrade(baseStage);
     }
 

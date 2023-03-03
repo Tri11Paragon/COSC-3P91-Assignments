@@ -2,7 +2,9 @@ package ca.cosc3p91.a2.gameobjects;
 
 import ca.cosc3p91.a2.util.Time;
 
-abstract class Stage {
+import java.util.HashMap;
+
+public abstract class Stage {
 
     protected int dHealth;
 

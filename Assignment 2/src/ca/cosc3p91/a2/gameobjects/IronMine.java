@@ -4,8 +4,7 @@ public class IronMine extends ResourceBuilding {
 
     public static String resource = "iron";
 
-    public IronMine(int lvl, ResourceStage baseStage) {
-        setLevel(lvl);
+    public IronMine(ResourceStage baseStage) {
         upgrade(baseStage);
     }
 

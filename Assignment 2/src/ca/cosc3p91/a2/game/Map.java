@@ -34,7 +34,19 @@ public class Map {
     }
 
     public void build(Tile t, Building b) {
-        contains.add(b);
+        int goldCost = b.getStage().getCost(SaulGoodMine.resource);
+        int ironCost = b.getStage().getCost(SaulGoodMine.resource);
+        int woodCost = b.getStage().getCost(SaulGoodMine.resource);
+        CasaDeNarino hall = getTownHall();
+        if (hall.getCurrentGold() >= goldCost && hall.getCurrentIron() >= ironCost && hall.getCurrentWood() >= woodCost) {
+            if(!hall.addGold(-goldCost))
+                throw new RuntimeException("Unable to subtract gold despite valid check!");
+            if(!hall.addIron(-ironCost))
+                throw new RuntimeException("Unable to subtract iron despite valid check!");
+            if(!hall.addWood(-woodCost))
+                throw new RuntimeException("Unable to subtract wood despite valid check!");
+            contains.add(b);
+        }
     }
 
     public int getGuardTime() {
