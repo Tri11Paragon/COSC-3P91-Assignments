@@ -2,7 +2,7 @@ package ca.cosc3p91.a2.gameobjects;
 
 import java.util.ArrayList;
 
-public class VillageHall extends Building {
+public class CasaDeNarino extends Building {
 
     private int goldCapacity = 0;
     private int ironCapacity = 0;
@@ -12,7 +12,7 @@ public class VillageHall extends Building {
     private int currentIron;
     private int currentWood;
 
-    public VillageHall(int lvl, VillageStage baseStage) {
+    public CasaDeNarino(int lvl, VillageStage baseStage) {
         setLevel(lvl);
         upgrade(baseStage);
     }

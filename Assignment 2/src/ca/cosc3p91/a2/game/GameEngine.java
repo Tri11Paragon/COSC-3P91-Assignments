@@ -3,7 +3,11 @@ package ca.cosc3p91.a2.game;
 import ca.cosc3p91.a2.gameobjects.*;
 import ca.cosc3p91.a2.player.*;
 import ca.cosc3p91.a2.util.Print;
+import ca.cosc3p91.a2.util.Time;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class GameEngine implements Runnable {
@@ -19,9 +23,7 @@ public class GameEngine implements Runnable {
 
     public GameEngine() {
         player = new Player();
-        VillageStage vInitialStage = new VillageStage(100, 0, 2, 30, 0,
-                0, 1000, 2500, 5000);
-        map = new Map(new VillageHall(1, vInitialStage), 30);
+        map = generateMap();
     }
 
     private void printState() {
@@ -71,21 +73,52 @@ public class GameEngine implements Runnable {
     }
 
     public void attackVillage(Map map) {
+
+    }
+
+    private Map generateInitialMap(){
+        VillageStage villageHallInitialStage = new VillageStage(100, 0, 2, new Time(), 0,
+                0, 1000, 2500, 5000);
+        return new Map(new CasaDeNarino(1, villageHallInitialStage), 30);
     }
 
     public Map generateMap() {
-        return null;
+        Map initialMap = generateInitialMap();
+        initialMap.build(new Tile(), new SaulGoodMine(1, new ResourceStage(50, 0, 0, new Time(), 0, 0, 25)));
+        return initialMap;
     }
 
     public void getScore(Map map) {
+
     }
 
     @Override
     public void run() {
-        Scanner sc = new Scanner(System.in);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(System.in));
+        Scanner sc = new Scanner(rd);
+        printState();
+        System.out.println();
         while (running) {
-            printState();
-            int in = sc.nextInt();
+            for (Building b : map.contains){
+                if ((b instanceof ResourceBuilding)) {
+                    ((ResourceBuilding) b).update(map.getTownHall());
+                }
+            }
+            //System.out.println("Updating");
+            try {
+                if (rd.ready()) {
+                    char in = sc.next().charAt(0);
+                    switch (in) {
+                        case 'p':
+                            printState();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

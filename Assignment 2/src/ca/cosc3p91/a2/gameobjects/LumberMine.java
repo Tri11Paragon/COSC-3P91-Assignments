@@ -9,8 +9,9 @@ public class LumberMine extends ResourceBuilding {
         upgrade(baseStage);
     }
 
-    public void harvest(VillageHall hall) {
-        hall.addCurrentWood(getHarvestRate());
+    @Override
+    protected ResourceHarvestHandler getHarvestHandler() {
+        return hall -> hall.addCurrentWood(getHarvestRate());
     }
 
 }

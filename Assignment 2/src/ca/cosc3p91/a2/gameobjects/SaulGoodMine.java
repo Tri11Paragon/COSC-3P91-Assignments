@@ -10,7 +10,7 @@ public class SaulGoodMine extends ResourceBuilding {
     }
 
     @Override
-    public void harvest(VillageHall hall) {
-        hall.addCurrentGold(getHarvestRate());
+    protected ResourceHarvestHandler getHarvestHandler() {
+        return hall -> hall.addCurrentGold(getHarvestRate());
     }
 }

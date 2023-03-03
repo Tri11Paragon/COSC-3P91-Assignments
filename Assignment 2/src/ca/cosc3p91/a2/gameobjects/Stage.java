@@ -1,5 +1,7 @@
 package ca.cosc3p91.a2.gameobjects;
 
+import ca.cosc3p91.a2.util.Time;
+
 abstract class Stage {
 
     protected int dHealth;
@@ -8,13 +10,13 @@ abstract class Stage {
 
     protected int requiredVillageLevel;
 
-    protected int upgradeTime;
+    protected Time upgradeTime;
 
     protected int ironCost;
 
     protected int woodCost;
 
-    public Stage(int dHealth, int goldCost, int requiredVillageLevel, int upgradeTime, int ironCost, int woodCost) {
+    public Stage(int dHealth, int goldCost, int requiredVillageLevel, Time upgradeTime, int ironCost, int woodCost) {
         this.dHealth = dHealth;
         this.goldCost = goldCost;
         this.requiredVillageLevel = requiredVillageLevel;
@@ -36,7 +38,7 @@ abstract class Stage {
         return requiredVillageLevel;
     }
 
-    public int getUpgradeTime() {
+    public Time getUpgradeTime() {
         return upgradeTime;
     }
 

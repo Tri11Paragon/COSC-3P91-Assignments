@@ -12,5 +12,7 @@ public class Farm extends ResourceBuilding {
     }
 
     @Override
-    public void harvest(VillageHall hall) {}
+    protected ResourceHarvestHandler getHarvestHandler() {
+        return hall -> {};
+    }
 }

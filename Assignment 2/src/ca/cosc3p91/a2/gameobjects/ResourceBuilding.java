@@ -4,6 +4,10 @@ import ca.cosc3p91.a2.util.Time;
 
 public abstract class ResourceBuilding extends Building {
 
+    protected interface ResourceHarvestHandler {
+        void harvest(CasaDeNarino hall);
+    }
+
     public static String resource;
 
     private final Time harvestMinTime = new Time().offsetSeconds(10);
@@ -20,14 +24,14 @@ public abstract class ResourceBuilding extends Building {
         this.harvest_rate += stage.getHarvestRateIncrease();
     }
 
-    public void update(VillageHall hall){
+    public void update(CasaDeNarino hall){
         if (nextHarvestTime.occurred()){
-            harvest(hall);
+            getHarvestHandler().harvest(hall);
             nextHarvestTime = Time.getTime().offsetTime(harvestMinTime);
         }
     }
 
-    protected abstract void harvest(VillageHall hall);
+    protected abstract ResourceHarvestHandler getHarvestHandler();
 
     public int getHarvestRate(){
         return harvest_rate;

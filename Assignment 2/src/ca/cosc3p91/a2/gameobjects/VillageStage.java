@@ -1,5 +1,7 @@
 package ca.cosc3p91.a2.gameobjects;
 
+import ca.cosc3p91.a2.util.Time;
+
 public class VillageStage extends Stage {
 
     protected int goldCapacityIncrease;
@@ -8,7 +10,7 @@ public class VillageStage extends Stage {
 
     protected int woodCapacityIncrease;
 
-    public VillageStage(int dHealth, int goldCost, int requiredVillageLevel, int upgradeTime, int ironCost, int woodCost,
+    public VillageStage(int dHealth, int goldCost, int requiredVillageLevel, Time upgradeTime, int ironCost, int woodCost,
                         int goldCapIncrease, int ironCapIncrease, int woodCapIncrease) {
         super(dHealth, goldCost, requiredVillageLevel, upgradeTime, ironCost, woodCost);
         this.goldCapacityIncrease = goldCapIncrease;
