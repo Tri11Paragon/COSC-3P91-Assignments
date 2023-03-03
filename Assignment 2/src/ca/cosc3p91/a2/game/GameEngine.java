@@ -12,6 +12,10 @@ import java.util.Scanner;
 
 public class GameEngine implements Runnable {
 
+    public static final double GOLD_FACTOR = 5;
+    public static final double IRON_FACTOR = 1;
+    public static final double WOOD_FACTOR = 0.1;
+
     private Player player;
     boolean running = true;
 
@@ -82,12 +86,16 @@ public class GameEngine implements Runnable {
 
     public Map generateMap() {
         Map initialMap = generateInitialMap();
-        initialMap.build(new Tile(), new SaulGoodMine(1, new ResourceStage(50, 0, 0, new Time(), 0, 0, 25)));
+        initialMap.getTownHall().upgrade(VillageHallStages.villageStages[this.map.getTownHall().getLevel()]);
         return initialMap;
     }
 
-    public void getScore(Map map) {
-
+    public int getScore(Map map) {
+        CasaDeNarino hall = map.getTownHall();
+        int score = (int)(hall.getCurrentGold() * GOLD_FACTOR + hall.getCurrentIron() * IRON_FACTOR + hall.getCurrentWood() * WOOD_FACTOR);
+        score += map.contains.size();
+        score += map.inhabitants.size();
+        return score;
     }
 
     @Override
