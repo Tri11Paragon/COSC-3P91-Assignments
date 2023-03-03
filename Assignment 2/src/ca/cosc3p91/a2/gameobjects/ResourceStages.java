@@ -58,4 +58,8 @@ public class ResourceStages {
         }
     }
 
+    public static ResourceStage[] goldStages = {new GoldStage1(), new GoldStage2(), new GoldStage3()};
+    public static ResourceStage[] ironStages = {new IronStage1(), new IronStage2(), new IronStage3()};
+    public static ResourceStage[] woodStages = {new WoodStage1(), new WoodStage2(), new WoodStage3()};
+
 }
