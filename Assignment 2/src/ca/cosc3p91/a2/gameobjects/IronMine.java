@@ -11,6 +11,6 @@ public class IronMine extends ResourceBuilding {
 
     @Override
     protected ResourceHarvestHandler getHarvestHandler() {
-        return hall -> hall.addCurrentIron(getHarvestRate());
+        return hall -> hall.addIron(getHarvestRate());
     }
 }

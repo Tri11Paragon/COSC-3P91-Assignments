@@ -1,16 +1,14 @@
 package ca.cosc3p91.a2.gameobjects;
 
-import java.util.ArrayList;
-
 public class CasaDeNarino extends Building {
 
     private int goldCapacity = 0;
     private int ironCapacity = 0;
     private int woodCapacity = 0;
 
-    private int currentGold;
-    private int currentIron;
-    private int currentWood;
+    private int currentGold = 0;
+    private int currentIron = 0;
+    private int currentWood = 50;
 
     public CasaDeNarino(int lvl, VillageStage baseStage) {
         setLevel(lvl);
@@ -41,23 +39,38 @@ public class CasaDeNarino extends Building {
         return currentGold;
     }
 
-    public void addCurrentGold(int currentGold) {
-        this.currentGold += currentGold;
+    public boolean addGold(int amount) {
+        int newGold = this.currentGold + amount;
+        if (newGold <= goldCapacity && this.currentGold + amount >= 0){
+            this.currentGold += amount;
+            return true;
+        }
+        return false;
     }
 
     public int getCurrentIron() {
         return currentIron;
     }
 
-    public void addCurrentIron(int currentIron) {
-        this.currentIron += currentIron;
+    public boolean addIron(int amount) {
+        int newIron = this.currentIron + amount;
+        if (newIron <= ironCapacity && newIron >= 0) {
+            this.currentIron += amount;
+            return true;
+        }
+        return false;
     }
 
     public int getCurrentWood() {
         return currentWood;
     }
 
-    public void addCurrentWood(int currentWood) {
-        this.currentWood += currentWood;
+    public boolean addWood(int amount) {
+        int newWood = this.currentWood + amount;
+        if (newWood <= woodCapacity && newWood >= 0) {
+            this.currentWood += amount;
+            return true;
+        }
+        return false;
     }
 }

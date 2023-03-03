@@ -11,7 +11,7 @@ public class LumberMine extends ResourceBuilding {
 
     @Override
     protected ResourceHarvestHandler getHarvestHandler() {
-        return hall -> hall.addCurrentWood(getHarvestRate());
+        return hall -> hall.addWood(getHarvestRate());
     }
 
 }
