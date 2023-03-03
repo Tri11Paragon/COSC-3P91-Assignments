@@ -62,6 +62,9 @@ public abstract class Building {
     public void upgrade(Stage stage) {
         this.stage = stage;
         this.health += stage.dHealth;
+        // evil hack
+        String name = stage.getClass().getSimpleName();
+        this.level = Integer.parseInt(name.charAt(name.length()-1) + "") - 1;
         // interact with the timer regarding Upgrade time
     }
 
