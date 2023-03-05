@@ -2,8 +2,8 @@ package ca.cosc3p91.a2.gameobjects;
 
 public class DefenseBuilding extends Building {
 
-    private int damage;
-    private int range;
+    private int damage = 0;
+    private int range = 0;
 
     public void upgrade(DefenseStage stage) {
         super.upgrade(stage);

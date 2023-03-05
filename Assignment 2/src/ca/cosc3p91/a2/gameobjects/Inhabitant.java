@@ -15,9 +15,8 @@ public interface Inhabitant {
     default int getLevel() {
         return lvl;
     }
+    int getCost();
 
-    default int setLevel(int level) {
-        return lvl;
-    }
+    void setLevel(int level);
 
 }

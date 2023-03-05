@@ -4,6 +4,8 @@ public class Worker implements Inhabitant {
 
     private boolean currentlyBuilding;
 
+    static int cost = 2;
+
     public void set_IsBuilding(boolean state) {
         currentlyBuilding = state;
     }
@@ -28,7 +30,12 @@ public class Worker implements Inhabitant {
     }
 
     @Override
-    public int setLevel(int level) {
-        return Inhabitant.super.setLevel(level);
+    public int getCost() {
+        return cost;
+    }
+
+    @Override
+    public void setLevel(int level) {
+
     }
 }

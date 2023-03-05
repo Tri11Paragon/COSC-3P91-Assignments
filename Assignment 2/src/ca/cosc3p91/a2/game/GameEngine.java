@@ -34,8 +34,8 @@ public class GameEngine implements Runnable {
         map = generateInitialMap();
     }
 
-    private void printState() {
-        Print resourcesPrinter = new Print("Current Village Resources", 2);
+    private void printState(Map map, String displayName) {
+        Print resourcesPrinter = new Print(displayName, 2);
 
         resourcesPrinter.addColumn(new Print.Column("Resource Type"));
         resourcesPrinter.addColumn(new Print.Column("Max"));
@@ -78,6 +78,16 @@ public class GameEngine implements Runnable {
             inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel())));
 
         Print.print(inhabs.createTable(true, true, true));
+    }
+
+    private void printMenuOptions() {
+        System.out.println("~ Player Options:\n" +
+                "1. Build {command: '1 <building name>'}\n" +
+                "2. Train inhabitants {command: '2 <unit name>'}\n"+
+                "3. Upgrade Building\n"+
+                "4. Explore\n"+
+                "5. Check Village Stats\n"+
+                "6. Quit");
     }
 
     public void attackVillage(Map map) {
@@ -169,12 +179,13 @@ public class GameEngine implements Runnable {
     public void run() {
         BufferedReader rd = new BufferedReader(new InputStreamReader(System.in));
         Scanner sc = new Scanner(rd);
-        printState();
+        printState(this.map,"Current Village State");
+        printMenuOptions();
         System.out.println();
         while (running) {
-            for (Building b : map.contains){
+            for (Building b : this.map.contains){
                 if ((b instanceof ResourceBuilding)) {
-                    ((ResourceBuilding) b).update(map.getTownHall());
+                    ((ResourceBuilding) b).update(this.map.getTownHall());
                 }
             }
             //System.out.println("Updating");
@@ -185,26 +196,40 @@ public class GameEngine implements Runnable {
                     System.out.println("Your Input: ");
                     System.out.println("\t->" + in);
                     switch (in.charAt(0)) {
-                        case 'p':
-                            printState();
-                            break;
-                        case 'q':
-                            System.exit(0);
-                            break;
-                        case 'b':
+                        case '1':
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
                                 Building type = determineType(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid building!");
-                                else
-                                    map.build(new Tile(), type);
+                                else if (this.map.build(new Tile(), type) ) {
+                                    System.out.println(type.getClass().getSimpleName()+" successfully built\n");
+                                } else System.out.println("Missing resources to build "+type.getClass().getSimpleName());
                             }
+                            break;
+                        case '2':
+                            if (args.length < 2) {
+                                System.err.println("Args must include type!");
+                            } else {
+                                Inhabitant type = determineInhabitantType(args[1]);
+                                if (type == null)
+                                    System.err.println("Args are not a valid inhabitant!");
+                                else if (this.map.train(type) ) {
+                                    System.out.println("successfully trained a(n) "+type.getClass().getSimpleName());
+                                } else System.out.println("Missing gold to train "+type.getClass().getSimpleName());
+                            }
+                            break;
+                        case '5':
+                            printState(this.map,"Current Village State");
+                            break;
+                        case '6':
+                            System.exit(0);
                             break;
                         default:
                             break;
                     }
+                    printMenuOptions();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -227,6 +252,27 @@ public class GameEngine implements Runnable {
             return new ArcherTower();
         } else if (building.contains("can") || c == 'c'){
             return new Cannon();
+        }
+        return null;
+    }
+
+    private static Inhabitant determineInhabitantType(String inhabitant){
+        inhabitant = inhabitant.toLowerCase();
+        char c = ' ';
+        if (inhabitant.trim().length() == 1)
+            c = inhabitant.charAt(0);
+        if (inhabitant.contains("soldier") || inhabitant.contains("sold") || c == 's') {
+            return new Soldier();
+        } else if (inhabitant.contains("knight") || c == 'k') {
+            return new Knight();
+        } else if (inhabitant.contains("work")|| c == 'w') {
+            return new Worker();
+        } else if (inhabitant.contains("collect") || c == 'c') {
+            return new Collector();
+        } else if (inhabitant.contains("cat")){
+            return new Catapult();
+        } else if (inhabitant.contains("archer") || c == 'a'){
+            return new Archer();
         }
         return null;
     }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Map {
 
-    static int MAXSIZE = 400;
+    static int MAXSIZE = 50;
 
     private CasaDeNarino townHall;
 
@@ -22,6 +22,8 @@ public class Map {
         inhabitants = new ArrayList<>();
         this.townHall = casaDeNarino;
         this.contains.add(casaDeNarino);
+        this.inhabitants.add(new Worker()); this.inhabitants.add(new Worker());
+        this.inhabitants.add(new Collector());
         this.guardTime = gTime;
     }
 
@@ -33,10 +35,10 @@ public class Map {
 
     }
 
-    public void build(Tile t, Building b) {
+    public boolean build(Tile t, Building b) {
         int goldCost = b.getStage().getCost(SaulGoodMine.resource);
-        int ironCost = b.getStage().getCost(SaulGoodMine.resource);
-        int woodCost = b.getStage().getCost(SaulGoodMine.resource);
+        int ironCost = b.getStage().getCost(IronMine.resource);
+        int woodCost = b.getStage().getCost(LumberMine.resource);
         CasaDeNarino hall = getTownHall();
         if (hall.getCurrentGold() >= goldCost && hall.getCurrentIron() >= ironCost && hall.getCurrentWood() >= woodCost) {
             if(!hall.addGold(-goldCost))
@@ -46,7 +48,20 @@ public class Map {
             if(!hall.addWood(-woodCost))
                 throw new RuntimeException("Unable to subtract wood despite valid check!");
             contains.add(b);
-        }
+            return true;
+        } else return false;
+    }
+
+    public boolean train(Inhabitant i) {
+        CasaDeNarino hall = getTownHall();
+        int goldCost = i.getCost();
+
+        if (hall.getCurrentGold() >= goldCost) {
+            if(!hall.addGold(-goldCost))
+                throw new RuntimeException("Unable to subtract gold despite valid check!");
+            inhabitants.add(i);
+            return true;
+        } else return false;
     }
 
     public int getGuardTime() {
