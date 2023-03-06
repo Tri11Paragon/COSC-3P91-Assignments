@@ -84,8 +84,9 @@ public class GameEngine<T> implements Runnable {
         System.out.println("~ Player Options:\n" +
                 "1. Build {command: '1 <building name>'}\n" +
                 "2. Train inhabitants {command: '2 <unit name>'}\n"+
-                "3. Upgrade Building\n"+
+                "3. Upgrade Building {command: '3 i<index>'} / {command: '3 b<index>'}\n"+
                 "4. Explore\n"+
+                "5. Attack\n"+
                 "5. Print Village Stats\n"+
                 "6. Quit\n");
     }
