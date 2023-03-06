@@ -38,9 +38,7 @@ public abstract class Building {
         return stage;
     }
 
-    public int getUpgradeCost() {
-        return 0;
-    }
+    public abstract Stage getUpgradeStage();
 
     public void setLevel(int level) {
         this.level = level;

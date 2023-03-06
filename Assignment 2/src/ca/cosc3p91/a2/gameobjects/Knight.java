@@ -4,6 +4,8 @@ public class Knight extends Infantry {
 
     static int cost = 6;
 
+    private int lvl = 0;
+
     public Knight() {
         super(150, 6, 6);
     }
@@ -20,7 +22,7 @@ public class Knight extends Infantry {
 
     @Override
     public int getLevel() {
-        return super.getLevel();
+        return lvl;
     }
 
     @Override
@@ -30,6 +32,6 @@ public class Knight extends Infantry {
 
     @Override
     public void setLevel(int level) {
-
+        lvl = level;
     }
 }

@@ -6,4 +6,9 @@ public class ArcherTower extends DefenseBuilding {
         setLevel(1);
         upgrade(DefenseStages.archerTowerStages[0]);
     }
+
+    @Override
+    public Stage getUpgradeStage() {
+        return DefenseStages.archerTowerStages[getLevel()+1];
+    }
 }

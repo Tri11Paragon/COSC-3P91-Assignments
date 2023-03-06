@@ -6,6 +6,8 @@ public class Worker implements Inhabitant {
 
     static int cost = 2;
 
+    private int lvl = 0;
+
     public void set_IsBuilding(boolean state) {
         currentlyBuilding = state;
     }
@@ -26,7 +28,7 @@ public class Worker implements Inhabitant {
 
     @Override
     public int getLevel() {
-        return Inhabitant.super.getLevel();
+        return lvl;
     }
 
     @Override
@@ -36,6 +38,6 @@ public class Worker implements Inhabitant {
 
     @Override
     public void setLevel(int level) {
-
+        lvl = level;
     }
 }

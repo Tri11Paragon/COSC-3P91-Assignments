@@ -15,4 +15,9 @@ public class Farm extends ResourceBuilding {
     protected ResourceHarvestHandler getHarvestHandler() {
         return hall -> {};
     }
+
+    @Override
+    public Stage getUpgradeStage() {
+        return ResourceStages.goldStages[getLevel()+1];
+    }
 }

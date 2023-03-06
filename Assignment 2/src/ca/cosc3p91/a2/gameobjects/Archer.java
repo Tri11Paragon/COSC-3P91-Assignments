@@ -4,6 +4,8 @@ public class Archer extends Infantry {
 
     static int cost = 4;
 
+    private int lvl = 0;
+
     public Archer() {
         super(90, 2, 10);
     }
@@ -20,7 +22,7 @@ public class Archer extends Infantry {
 
     @Override
     public int getLevel() {
-        return super.getLevel();
+        return lvl;
     }
 
     @Override
@@ -30,7 +32,7 @@ public class Archer extends Infantry {
 
     @Override
     public void setLevel(int level) {
-
+        lvl = level;
     }
 
 }

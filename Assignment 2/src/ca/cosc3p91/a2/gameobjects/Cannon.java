@@ -6,4 +6,9 @@ public class Cannon extends DefenseBuilding {
         setLevel(1);
         upgrade(DefenseStages.cannonStages[0]);
     }
+
+    @Override
+    public Stage getUpgradeStage() {
+        return DefenseStages.cannonStages[getLevel()+1];
+    }
 }

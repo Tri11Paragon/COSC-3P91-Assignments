@@ -12,4 +12,9 @@ public class IronMine extends ResourceBuilding {
     protected ResourceHarvestHandler getHarvestHandler() {
         return hall -> hall.addIron(getHarvestRate());
     }
+
+    @Override
+    public Stage getUpgradeStage() {
+        return ResourceStages.ironStages[getLevel()+1];
+    }
 }

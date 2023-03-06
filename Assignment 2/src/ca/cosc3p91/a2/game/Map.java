@@ -53,6 +53,58 @@ public class Map {
             return false;
     }
 
+    public boolean upgradeBuilding(Building b) {
+        int currentLevel = b.getLevel();
+        CasaDeNarino hall = getTownHall();
+
+        if (currentLevel >= 2) return false;
+        if (b instanceof Farm) return true;
+
+        int goldCost = b.getUpgradeStage().getCost(SaulGoodMine.resource);
+        int ironCost = b.getUpgradeStage().getCost(IronMine.resource);
+        int woodCost = b.getUpgradeStage().getCost(LumberMine.resource);
+
+        if (hall.getCurrentGold() >= goldCost && hall.getCurrentIron() >= ironCost && hall.getCurrentWood() >= woodCost) {
+
+            if (b instanceof DefenseBuilding) {
+                ((DefenseBuilding) b).upgrade(
+                        (b instanceof ArcherTower) ? (DefenseStages.archerTowerStages[currentLevel + 1]) :
+                                (DefenseStages.cannonStages[currentLevel + 1])
+                );
+            } else if (b instanceof ResourceBuilding) {
+                ((ResourceBuilding) b).upgrade(
+                        (b instanceof IronMine) ? (ResourceStages.ironStages[currentLevel + 1]) :
+                                (b instanceof SaulGoodMine) ? (ResourceStages.goldStages[currentLevel + 1]) :
+                                        (ResourceStages.woodStages[currentLevel + 1])
+                );
+            } else {
+                b.upgrade(VillageHallStages.villageStages[currentLevel + 1]);
+            }
+        } else return false;
+
+        return true;
+    }
+
+    public boolean upgradeInhabitant(Inhabitant i) {
+        int currentLevel = i.getLevel();
+        CasaDeNarino hall = getTownHall();
+
+        if (currentLevel >= 2 || hall.getCurrentGold() < 5) return false;
+
+        i.setLevel(++currentLevel);
+        hall.addGold(-5);
+
+        if (i instanceof Infantry) {
+            ((Infantry) i).setHealth(((Infantry) i).getHealth() + 1);
+            ((Infantry) i).setDamage(((Infantry) i).getDamage() + 1);
+            ((Infantry) i).setRange(((Infantry) i).getRange() + 1);
+        } else if (i instanceof Collector) {
+            ((Collector) i).setCollectionRate(((Collector) i).getCollectionRate() + 1);
+        }
+
+        return true;
+    }
+
     public boolean train(Inhabitant i) {
         CasaDeNarino hall = getTownHall();
         int goldCost = i.getCost();

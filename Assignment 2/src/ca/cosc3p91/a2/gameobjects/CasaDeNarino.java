@@ -15,6 +15,11 @@ public class CasaDeNarino extends Building {
         upgrade(baseStage);
     }
 
+    @Override
+    public Stage getUpgradeStage() {
+        return VillageHallStages.villageStages[getLevel()+1];
+    }
+
     public void upgrade(VillageStage stage) {
         super.upgrade(stage);
         this.goldCapacity += stage.getGoldCapacityIncrease();

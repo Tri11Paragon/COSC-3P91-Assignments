@@ -13,4 +13,8 @@ public class LumberMine extends ResourceBuilding {
         return hall -> hall.addWood(getHarvestRate());
     }
 
+    @Override
+    public Stage getUpgradeStage() {
+        return ResourceStages.woodStages[getLevel()+1];
+    }
 }

@@ -99,7 +99,7 @@ public class GameEngine<T> implements Runnable {
             if (b instanceof DefenseBuilding)
                 defenseiveCounter++;
         for (Inhabitant i : map.inhabitants)
-            if (b instanceof Infantry)
+            if (i instanceof Infantry)
                 inhabCounter++;
         pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
         if (pillageFactor < 0)
@@ -250,6 +250,23 @@ public class GameEngine<T> implements Runnable {
                             }
                             break;
                         case '3':
+                            if (args.length < 2) {
+                                System.err.println("Args must include type!");
+                            } else {
+                                if (args[1].contains("i")) {
+                                    Inhabitant unit = map.inhabitants.get(Integer.parseInt(args[1].substring(1)));
+                                    if (map.upgradeInhabitant(unit) ){
+                                        System.out.println("successfully trained a(n)"+unit.getClass().getSimpleName());
+                                    } else System.out.println("Missing Resources to train "+unit.getClass().getSimpleName());
+                                } else if (args[1].contains("b")) {
+                                    Building bUnit = map.contains.get(Integer.parseInt(args[1].substring(1)));
+                                    if (map.upgradeBuilding(bUnit) ){
+                                        System.out.println("successfully trained a(n)"+bUnit.getClass().getSimpleName());
+                                    } else System.out.println("Missing Resources to train "+bUnit.getClass().getSimpleName());
+                                } else {
+                                    System.err.println("Args are not a valid unit!");
+                                }
+                            }
                             break;
                         case '4':
                             deleteMyHeart = false;

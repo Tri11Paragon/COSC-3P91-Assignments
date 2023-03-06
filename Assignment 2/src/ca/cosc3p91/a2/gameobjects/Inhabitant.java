@@ -6,17 +6,14 @@ public interface Inhabitant {
 
     Map map = null;
     Building building = null;
-    int lvl = 1;
+    int lvl = 0;
 
     void move(Tile t);
 
     void getPosition();
 
-    default int getLevel() {
-        return lvl;
-    }
-    int getCost();
-
+    int getLevel();
     void setLevel(int level);
+    int getCost();
 
 }

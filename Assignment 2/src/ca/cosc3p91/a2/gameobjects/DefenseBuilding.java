@@ -1,6 +1,6 @@
 package ca.cosc3p91.a2.gameobjects;
 
-public class DefenseBuilding extends Building {
+public abstract class DefenseBuilding extends Building {
 
     private int damage = 0;
     private int range = 0;

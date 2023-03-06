@@ -12,4 +12,9 @@ public class SaulGoodMine extends ResourceBuilding {
     protected ResourceHarvestHandler getHarvestHandler() {
         return hall -> hall.addGold(getHarvestRate());
     }
+
+    @Override
+    public Stage getUpgradeStage() {
+        return ResourceStages.goldStages[getLevel()+1];
+    }
 }
