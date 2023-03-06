@@ -65,7 +65,7 @@ public class GameEngine<T> implements Runnable {
 
         for (Building b : map.contains)
             buildingPrinter.addRow(new Print.Row(b.getClass().getSimpleName(),
-                    Integer.toString(b.getLevel()),
+                    Integer.toString(b.getLevel() + 1),
                     Integer.toString(b.getHealth())));
 
         Print.print(buildingPrinter.createTable(true, false, true));
@@ -204,7 +204,8 @@ public class GameEngine<T> implements Runnable {
                                     System.err.println("Args are not a valid building!");
                                 else if (this.map.build(new Tile(), type) ) {
                                     System.out.println(type.getClass().getSimpleName()+" successfully built\n");
-                                } else System.out.println("Missing resources to build "+type.getClass().getSimpleName());
+                                } else
+                                    System.out.println("Missing resources to build "+type.getClass().getSimpleName());
                             }
                             break;
                         case '2':
@@ -219,6 +220,10 @@ public class GameEngine<T> implements Runnable {
                                 } else System.out.println("Missing gold to train "+type.getClass().getSimpleName());
                             }
                             break;
+                        case '3':
+                            break;
+                        case '4':
+                            break;
                         case '5':
                             printState(this.map,"Home Village");
                             break;
@@ -230,7 +235,7 @@ public class GameEngine<T> implements Runnable {
                     }
                     printMenuOptions();
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         }

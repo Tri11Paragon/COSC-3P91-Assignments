@@ -49,7 +49,8 @@ public class Map {
                 throw new RuntimeException("Unable to subtract wood despite valid check!");
             contains.add(b);
             return true;
-        } else return false;
+        } else
+            return false;
     }
 
     public boolean train(Inhabitant i) {
