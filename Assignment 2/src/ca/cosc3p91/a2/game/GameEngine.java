@@ -86,8 +86,8 @@ public class GameEngine<T> implements Runnable {
                 "2. Train inhabitants {command: '2 <unit name>'}\n"+
                 "3. Upgrade Building\n"+
                 "4. Explore\n"+
-                "5. Check Village Stats\n"+
-                "6. Quit");
+                "5. Print Village Stats\n"+
+                "6. Quit\n");
     }
 
     public void attackVillage(Map map) {
@@ -199,7 +199,7 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                Building type = (Building)determineType(args[1],new Cannon());
+                                Building type = determineBuildingType(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid building!");
                                 else if (this.map.build(new Tile(), type) ) {
@@ -211,7 +211,7 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                Inhabitant type = (Inhabitant)determineType(args[1],new Worker());
+                                Inhabitant type = determineInhabitantType(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid inhabitant!");
                                 else if (this.map.train(type) ) {
@@ -220,7 +220,7 @@ public class GameEngine<T> implements Runnable {
                             }
                             break;
                         case '5':
-                            printState(this.map,"Current Village State");
+                            printState(this.map,"Home Village");
                             break;
                         case '6':
                             System.exit(0);
@@ -236,39 +236,50 @@ public class GameEngine<T> implements Runnable {
         }
     }
 
-    private static <T> Object determineType(String argument, T type){
-        argument = argument.toLowerCase();
+    private static char determineChar(String str){
         char c = ' ';
-        if (argument.trim().length() == 1)
-            c = argument.charAt(0);
+        if (str.trim().length() == 1)
+            c = str.charAt(0);
+        return c;
+    }
 
-        if (type instanceof Building) {
-            if (argument.contains("gold") || argument.contains("good") || c == 'g') {
-                return new SaulGoodMine(ResourceStages.goldStages[0]);
-            } else if (argument.contains("iron") || c == 'i') {
-                return new IronMine(ResourceStages.ironStages[0]);
-            } else if (argument.contains("wood") || argument.contains("lumber") || c == 'w' || c == 'l') {
-                return new LumberMine(ResourceStages.woodStages[0]);
-            } else if (argument.contains("archer") || c == 'a') {
-                return new ArcherTower();
-            } else if (argument.contains("can") || c == 'c') {
-                return new Cannon();
-            }
-        } else if (type instanceof Inhabitant) {
-            if (argument.contains("soldier") || argument.contains("sold") || c == 's') {
-                return new Soldier();
-            } else if (argument.contains("knight") || c == 'k') {
-                return new Knight();
-            } else if (argument.contains("work") || c == 'w') {
-                return new Worker();
-            } else if (argument.contains("collect") || c == 'c') {
-                return new Collector();
-            } else if (argument.contains("cat")) {
-                return new Catapult();
-            } else if (argument.contains("arch") || c == 'a') {
-                return new Archer();
-            }
+    private static Building determineBuildingType(String argument){
+        argument = argument.toLowerCase();
+        char c = determineChar(argument);
+
+        if (argument.contains("gold") || argument.contains("good") || c == 'g') {
+            return new SaulGoodMine(ResourceStages.goldStages[0]);
+        } else if (argument.contains("iron") || c == 'i') {
+            return new IronMine(ResourceStages.ironStages[0]);
+        } else if (argument.contains("wood") || argument.contains("lumber") || c == 'w' || c == 'l') {
+            return new LumberMine(ResourceStages.woodStages[0]);
+        } else if (argument.contains("archer") || c == 'a') {
+            return new ArcherTower();
+        } else if (argument.contains("can") || c == 'c') {
+            return new Cannon();
         }
+
+        return null;
+    }
+
+    private static Inhabitant determineInhabitantType(String argument) {
+        argument = argument.toLowerCase();
+        char c = determineChar(argument);
+
+        if (argument.contains("soldier") || c == 's') {
+            return new Soldier();
+        } else if (argument.contains("knight") || c == 'k') {
+            return new Knight();
+        } else if (argument.contains("work") || c == 'w') {
+            return new Worker();
+        } else if (argument.contains("collect") || c == 'c') {
+            return new Collector();
+        } else if (argument.contains("cat")) {
+            return new Catapult();
+        } else if (argument.contains("arch") || c == 'a') {
+            return new Archer();
+        }
+
         return null;
     }
 
