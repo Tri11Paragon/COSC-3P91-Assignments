@@ -21,7 +21,7 @@ public class GameEngine<T> implements Runnable {
     private Player player;
     boolean running = true;
 
-    private int pillageFactor;
+    private float pillageFactor = 0.5f;
 
     private int currentTime;
 
@@ -75,7 +75,7 @@ public class GameEngine<T> implements Runnable {
         inhabs.addColumn(new Print.Column("Level"));
 
         for (Inhabitant i : map.inhabitants)
-            inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel())));
+            inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel() + 1)));
 
         Print.print(inhabs.createTable(true, true, true));
     }
@@ -87,11 +87,27 @@ public class GameEngine<T> implements Runnable {
                 "3. Upgrade Building\n"+
                 "4. Explore\n"+
                 "5. Print Village Stats\n"+
-                "6. Quit\n");
+                "6. Quit\n" +
+                "7. Attack last explored\n");
     }
 
     public void attackVillage(Map map) {
-
+        int defenseiveCounter = 1;
+        int inhabCounter = 0;
+        for (Building b : map.contains)
+            if (b instanceof DefenseBuilding)
+                defenseiveCounter++;
+        for (Inhabitant i : map.inhabitants)
+            if (b instanceof Infantry)
+                inhabCounter++;
+        pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
+        if (pillageFactor < 0)
+            pillageFactor = 0;
+        if (pillageFactor > 1)
+            pillageFactor = 1;
+        this.map.getTownHall().addWood((int) (map.getTownHall().getCurrentWood() * pillageFactor));
+        this.map.getTownHall().addIron((int) (map.getTownHall().getCurrentIron() * pillageFactor));
+        this.map.getTownHall().addGold((int) (map.getTownHall().getCurrentGold() * pillageFactor));
     }
 
     private Map generateInitialMap(){
@@ -100,12 +116,19 @@ public class GameEngine<T> implements Runnable {
 
     public Map generateMap() {
         Map initialMap = generateInitialMap();
+
+        CasaDeNarino hall = initialMap.getTownHall();
+
         // generate a similar town hall
         int levelChange = random.nextInt(2) - 1;
         int nextLevel = this.map.getTownHall().getLevel() + levelChange;
         // only need to change if the new village level is higher than initial
         if (nextLevel > 0)
-            initialMap.getTownHall().upgrade(VillageHallStages.villageStages[nextLevel]);
+            hall.upgrade(VillageHallStages.villageStages[nextLevel]);
+
+        hall.addWood(this.map.getTownHall().getCurrentWood() + random.nextInt(500) - 150);
+        hall.addIron(this.map.getTownHall().getCurrentIron() + random.nextInt(500) - 150);
+        hall.addGold(this.map.getTownHall().getCurrentGold() + random.nextInt(500) - 150);
 
         int buildingCount = this.map.contains.size();
 
@@ -182,6 +205,8 @@ public class GameEngine<T> implements Runnable {
         printState(this.map,"Current Village State");
         printMenuOptions();
         System.out.println();
+        Map exploringMap = null;
+        boolean deleteMyHeart = true;
         while (running) {
             for (Building b : this.map.contains){
                 if ((b instanceof ResourceBuilding)) {
@@ -194,6 +219,9 @@ public class GameEngine<T> implements Runnable {
                     String[] args = in.split(" ");
                     System.out.println("Your Input: ");
                     System.out.println("\t->" + in);
+                    // reset the map if they aren't exploring
+                    if (in.charAt(0) != '4')
+                        deleteMyHeart = true;
                     switch (in.charAt(0)) {
                         case '1':
                             if (args.length < 2) {
@@ -223,6 +251,15 @@ public class GameEngine<T> implements Runnable {
                         case '3':
                             break;
                         case '4':
+                            deleteMyHeart = false;
+                            exploringMap = generateMap();
+                            printState(exploringMap, "Other Village");
+                            break;
+                        case '7':
+                            if (exploringMap != null)
+                                attackVillage(exploringMap);
+                            else
+                                System.out.println("Error: Explored map is null. Have you explored last command?");
                             break;
                         case '5':
                             printState(this.map,"Home Village");
@@ -238,6 +275,8 @@ public class GameEngine<T> implements Runnable {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+            if (deleteMyHeart)
+                exploringMap = null;
         }
     }
 
