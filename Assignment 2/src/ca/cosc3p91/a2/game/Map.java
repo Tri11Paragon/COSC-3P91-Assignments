@@ -53,12 +53,17 @@ public class Map {
             return false;
     }
 
-    public boolean upgradeBuilding(Building b) {
+    public boolean upgradeBuilding(int buildingIndex) {
+
+        if (buildingIndex >= contains.size()) return false;
+
+        Building b = contains.get(buildingIndex);
+
         int currentLevel = b.getLevel();
         CasaDeNarino hall = getTownHall();
 
         if (currentLevel >= 2) return false;
-        if (b instanceof Farm) return true;
+        else if (b instanceof Farm) return true;
 
         int goldCost = b.getUpgradeStage().getCost(SaulGoodMine.resource);
         int ironCost = b.getUpgradeStage().getCost(IronMine.resource);
@@ -85,7 +90,12 @@ public class Map {
         return true;
     }
 
-    public boolean upgradeInhabitant(Inhabitant i) {
+    public boolean upgradeInhabitant(int inhabitantIndex) {
+
+        if (inhabitantIndex >= inhabitants.size()) return false;
+
+        Inhabitant i = inhabitants.get(inhabitantIndex);
+
         int currentLevel = i.getLevel();
         CasaDeNarino hall = getTownHall();
 

@@ -81,7 +81,7 @@ public class GameEngine<T> implements Runnable {
     }
 
     private void printMenuOptions() {
-        System.out.println("~ Player Options:\n" +
+        System.out.println("\n~ Player Options:\n" +
                 "1. Build {command: '1 <building name>'}\n" +
                 "2. Train inhabitants {command: '2 <unit name>'}\n"+
                 "3. Upgrade Building {command: '3 i<index>'} / {command: '3 b<index>'}\n"+
@@ -219,7 +219,7 @@ public class GameEngine<T> implements Runnable {
                     String in = sc.nextLine();
                     String[] args = in.split(" ");
                     System.out.println("Your Input: ");
-                    System.out.println("\t->" + in);
+                    System.out.println("\t->" + in + '\n');
                     // reset the map if they aren't exploring
                     if (in.charAt(0) != '4')
                         deleteMyHeart = true;
@@ -253,16 +253,21 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                if (args[1].contains("i")) {
-                                    Inhabitant unit = map.inhabitants.get(Integer.parseInt(args[1].substring(1)));
-                                    if (map.upgradeInhabitant(unit) ){
-                                        System.out.println("successfully trained a(n)"+unit.getClass().getSimpleName());
-                                    } else System.out.println("Missing Resources to train "+unit.getClass().getSimpleName());
-                                } else if (args[1].contains("b")) {
-                                    Building bUnit = map.contains.get(Integer.parseInt(args[1].substring(1)));
-                                    if (map.upgradeBuilding(bUnit) ){
-                                        System.out.println("successfully trained a(n)"+bUnit.getClass().getSimpleName());
-                                    } else System.out.println("Missing Resources to train "+bUnit.getClass().getSimpleName());
+                                int unitIndex = Integer.parseInt(args[1].substring(1));
+
+                                if (unitIndex < 0) {
+                                    System.err.println("Invalid Index");
+                                    break;
+                                }
+
+                                if (args[1].contains("i") && (unitIndex < map.inhabitants.size()) ) {
+                                    if ( map.upgradeInhabitant(unitIndex) ) {
+                                        System.out.println("successfully upgraded a(n) "+map.inhabitants.get(unitIndex).getClass().getSimpleName());
+                                    } else System.out.println("Missing Resources to upgrade "+map.inhabitants.get(unitIndex).getClass().getSimpleName());
+                                } else if (args[1].contains("b") && (unitIndex < map.contains.size()) ) {
+                                    if ( map.upgradeBuilding(unitIndex) ) {
+                                        System.out.println("successfully upgraded a(n) "+map.contains.get(unitIndex).getClass().getSimpleName());
+                                    } else System.out.println("Missing Resources to upgrade "+map.contains.get(unitIndex).getClass().getSimpleName());
                                 } else {
                                     System.err.println("Args are not a valid unit!");
                                 }
