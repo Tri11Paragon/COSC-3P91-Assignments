@@ -4,9 +4,6 @@ import ca.cosc3p91.a2.util.Time;
 
 public class DefenseStages {
 
-    // !! need to adjust these values | |
-    //                                v v
-
     public static class ArcherTowerStage1 extends DefenseStage {
         public ArcherTowerStage1() {
             super(100, 0, 0, new Time().offsetMinutes(1), 25, 75, 4,6);
