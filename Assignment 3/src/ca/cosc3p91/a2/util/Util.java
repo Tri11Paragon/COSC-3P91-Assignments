@@ -12,4 +12,11 @@ public class Util {
         return Math.min(Math.max(i, min), max);
     }
 
+    public static char getFirstChar(String str){
+        char c = ' ';
+        if (str.trim().length() == 1)
+            c = str.charAt(0);
+        return c;
+    }
+
 }

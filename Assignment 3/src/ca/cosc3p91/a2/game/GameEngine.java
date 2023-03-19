@@ -1,6 +1,8 @@
 package ca.cosc3p91.a2.game;
 
 import ca.cosc3p91.a2.gameobjects.*;
+import ca.cosc3p91.a2.gameobjects.factory.BuildingFactory;
+import ca.cosc3p91.a2.gameobjects.factory.InhabitantFactory;
 import ca.cosc3p91.a2.player.*;
 import ca.cosc3p91.a2.util.Print;
 import ca.cosc3p91.a2.util.Time;
@@ -227,7 +229,8 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                Building type = determineBuildingType(args[1]);
+                                BuildingFactory bfactory = new BuildingFactory();
+                                Building type = bfactory.getBuilding(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid building!");
                                 else if (this.map.build(new Tile(), type) ) {
@@ -240,7 +243,8 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                Inhabitant type = determineInhabitantType(args[1]);
+                                InhabitantFactory ifactory = new InhabitantFactory();
+                                Inhabitant type = ifactory.getInhabitant(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid inhabitant!");
                                 else if (this.map.train(type) ) {
@@ -300,53 +304,6 @@ public class GameEngine<T> implements Runnable {
             if (deleteMyHeart)
                 exploringMap = null;
         }
-    }
-
-    private static char determineChar(String str){
-        char c = ' ';
-        if (str.trim().length() == 1)
-            c = str.charAt(0);
-        return c;
-    }
-
-    private static Building determineBuildingType(String argument){
-        argument = argument.toLowerCase();
-        char c = determineChar(argument);
-
-        if (argument.contains("gold") || argument.contains("good") || c == 'g') {
-            return new SaulGoodMine(ResourceStages.goldStages[0]);
-        } else if (argument.contains("iron") || c == 'i') {
-            return new IronMine(ResourceStages.ironStages[0]);
-        } else if (argument.contains("wood") || argument.contains("lumber") || c == 'w' || c == 'l') {
-            return new LumberMine(ResourceStages.woodStages[0]);
-        } else if (argument.contains("archer") || c == 'a') {
-            return new ArcherTower();
-        } else if (argument.contains("can") || c == 'c') {
-            return new Cannon();
-        }
-
-        return null;
-    }
-
-    private static Inhabitant determineInhabitantType(String argument) {
-        argument = argument.toLowerCase();
-        char c = determineChar(argument);
-
-        if (argument.contains("soldier") || c == 's') {
-            return new Soldier();
-        } else if (argument.contains("knight") || c == 'k') {
-            return new Knight();
-        } else if (argument.contains("work") || c == 'w') {
-            return new Worker();
-        } else if (argument.contains("collect") || c == 'c') {
-            return new Collector();
-        } else if (argument.contains("cat")) {
-            return new Catapult();
-        } else if (argument.contains("arch") || c == 'a') {
-            return new Archer();
-        }
-
-        return null;
     }
 
 }
