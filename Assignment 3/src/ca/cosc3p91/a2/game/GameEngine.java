@@ -4,15 +4,9 @@ import ca.cosc3p91.a2.gameobjects.*;
 import ca.cosc3p91.a2.gameobjects.factory.BuildingFactory;
 import ca.cosc3p91.a2.gameobjects.factory.InhabitantFactory;
 import ca.cosc3p91.a2.player.*;
-import ca.cosc3p91.a2.util.Print;
-import ca.cosc3p91.a2.util.Time;
-import ca.cosc3p91.a2.util.Util;
+import ca.cosc3p91.a2.userinterface.GameDisplay;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Random;
-import java.util.Scanner;
 
 public class GameEngine<T> implements Runnable {
 
@@ -30,67 +24,11 @@ public class GameEngine<T> implements Runnable {
     private final Random random = new Random(System.nanoTime());
 
     public Map map;
+    public GameDisplay view;
 
     public GameEngine() {
         player = new Player();
         map = generateInitialMap();
-    }
-
-    private void printState(Map map, String displayName) {
-        Print resourcesPrinter = new Print(displayName, 2);
-
-        resourcesPrinter.addColumn(new Print.Column("Resource Type"));
-        resourcesPrinter.addColumn(new Print.Column("Max"));
-        resourcesPrinter.addColumn(new Print.Column("Amount"));
-
-        resourcesPrinter.addRow(new Print.Row(
-                "Wood",
-                Integer.toString(map.getTownHall().getWoodCapacity()),
-                Integer.toString(map.getTownHall().getCurrentWood())));
-
-        resourcesPrinter.addRow(new Print.Row(
-                "Iron",
-                Integer.toString(map.getTownHall().getIronCapacity()),
-                Integer.toString(map.getTownHall().getCurrentIron())));
-
-        resourcesPrinter.addRow(new Print.Row(
-                "Gold",
-                Integer.toString(map.getTownHall().getGoldCapacity()),
-                Integer.toString(map.getTownHall().getCurrentGold())));
-
-        Print.print(resourcesPrinter.createTable(true, false, true));
-
-        Print buildingPrinter = new Print("Village Buildings", 2, resourcesPrinter.getWidth());
-        buildingPrinter.addColumn(new Print.Column("Name"));
-        buildingPrinter.addColumn(new Print.Column("Level"));
-        buildingPrinter.addColumn(new Print.Column("Health"));
-
-        for (Building b : map.contains)
-            buildingPrinter.addRow(new Print.Row(b.getClass().getSimpleName(),
-                    Integer.toString(b.getLevel() + 1),
-                    Integer.toString(b.getHealth())));
-
-        Print.print(buildingPrinter.createTable(true, false, true));
-
-        Print inhabs = new Print("Village Inhabitants", 2, buildingPrinter.getWidth());
-        inhabs.addColumn(new Print.Column("Name"));
-        inhabs.addColumn(new Print.Column("Level"));
-
-        for (Inhabitant i : map.inhabitants)
-            inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel() + 1)));
-
-        Print.print(inhabs.createTable(true, true, true));
-    }
-
-    private void printMenuOptions() {
-        System.out.println("\n~ Player Options:\n" +
-                "1. Build {command: '1 <building name>'}\n" +
-                "2. Train inhabitants {command: '2 <unit name>'}\n"+
-                "3. Upgrade {command: '3 i<index>'} / {command: '3 b<index>'}\n"+
-                "4. Explore\n"+
-                "5. Print Village Stats\n"+
-                "6. Quit\n" +
-                "7. Attack last explored\n");
     }
 
     public void attackVillage(Map map) {
@@ -202,10 +140,12 @@ public class GameEngine<T> implements Runnable {
 
     @Override
     public void run() {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(System.in));
-        Scanner sc = new Scanner(rd);
-        printState(this.map,"Current Village State");
-        printMenuOptions();
+        String in;
+
+        view = new GameDisplay();
+        view.printVillageState(this.map,"Current Village State");
+        view.printGameMenu();
+
         System.out.println();
         Map exploringMap = null;
         boolean deleteMyHeart = true;
@@ -216,8 +156,7 @@ public class GameEngine<T> implements Runnable {
                 }
             }
             try {
-                if (rd.ready()) {
-                    String in = sc.nextLine();
+                if ((in = view.nextInput()) != null) {
                     String[] args = in.split(" ");
                     System.out.println("Your Input: ");
                     System.out.println("\t->" + in + '\n');
@@ -279,7 +218,7 @@ public class GameEngine<T> implements Runnable {
                         case '4':
                             deleteMyHeart = false;
                             exploringMap = generateMap();
-                            printState(exploringMap, "Other Village");
+                            view.printVillageState(exploringMap,"Other Village");
                             break;
                         case '7':
                             if (exploringMap != null)
@@ -288,7 +227,7 @@ public class GameEngine<T> implements Runnable {
                                 System.out.println("Error: Explored map is null. Have you explored last command?");
                             break;
                         case '5':
-                            printState(this.map,"Home Village");
+                            view.printVillageState(this.map,"Home Village");
                             break;
                         case '6':
                             System.exit(0);
@@ -296,7 +235,7 @@ public class GameEngine<T> implements Runnable {
                         default:
                             break;
                     }
-                    printMenuOptions();
+                    view.printGameMenu();
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
