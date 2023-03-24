@@ -17,6 +17,11 @@ public class Farm extends ResourceBuilding {
     }
 
     @Override
+    public String getResource() {
+        return "UNUSED";
+    }
+
+    @Override
     public Stage getUpgradeStage() {
         return ResourceStages.goldStages[getLevel()+1];
     }

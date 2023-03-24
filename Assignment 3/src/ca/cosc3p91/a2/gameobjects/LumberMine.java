@@ -14,6 +14,11 @@ public class LumberMine extends ResourceBuilding {
     }
 
     @Override
+    public String getResource() {
+        return resource;
+    }
+
+    @Override
     public Stage getUpgradeStage() {
         return ResourceStages.woodStages[getLevel()+1];
     }

@@ -15,4 +15,8 @@ public abstract class DefenseBuilding extends Building {
 
     }
 
+    public int getDamage(){
+        return damage;
+    }
+
 }

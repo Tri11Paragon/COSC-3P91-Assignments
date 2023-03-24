@@ -14,6 +14,11 @@ public class IronMine extends ResourceBuilding {
     }
 
     @Override
+    public String getResource() {
+        return resource;
+    }
+
+    @Override
     public Stage getUpgradeStage() {
         return ResourceStages.ironStages[getLevel()+1];
     }

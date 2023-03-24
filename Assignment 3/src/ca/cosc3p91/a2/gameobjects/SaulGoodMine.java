@@ -14,6 +14,11 @@ public class SaulGoodMine extends ResourceBuilding {
     }
 
     @Override
+    public String getResource() {
+        return resource;
+    }
+
+    @Override
     public Stage getUpgradeStage() {
         return ResourceStages.goldStages[getLevel()+1];
     }

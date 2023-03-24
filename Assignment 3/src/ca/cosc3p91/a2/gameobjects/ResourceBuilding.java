@@ -37,4 +37,6 @@ public abstract class ResourceBuilding extends Building {
         return harvest_rate;
     }
 
+    public abstract String getResource();
+
 }
