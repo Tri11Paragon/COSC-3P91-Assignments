@@ -2,9 +2,9 @@ package ca.cosc3p91.a3.gameobjects;
 
 import ca.cosc3p91.a3.util.Time;
 
-import java.util.HashMap;
+import java.io.Serializable;
 
-public abstract class Stage {
+public abstract class Stage implements Serializable {
 
     protected int dHealth;
 

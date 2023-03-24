@@ -1,18 +1,19 @@
 package ca.cosc3p91.a3.game;
 
 import ca.cosc3p91.a3.gameobjects.*;
+import ca.cosc3p91.a3.gameobjects.factory.BuildingFactory;
+import ca.cosc3p91.a3.gameobjects.factory.InhabitantFactory;
 import ca.cosc3p91.a3.player.*;
-import ca.cosc3p91.a3.util.Print;
-import ca.cosc3p91.a3.util.Time;
-import ca.cosc3p91.a3.util.Util;
+import ca.cosc3p91.a3.userinterface.GameDisplay;
+import ca.cosc3p91.a3.util.ChallengeAdapter;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.beans.XMLEncoder;
+import java.io.BufferedOutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
-import java.util.Scanner;
 
-public class GameEngine<T> implements Runnable {
+public class GameEngine implements Runnable {
 
     public static final double GOLD_FACTOR = 5;
     public static final double IRON_FACTOR = 1;
@@ -28,86 +29,32 @@ public class GameEngine<T> implements Runnable {
     private final Random random = new Random(System.nanoTime());
 
     public Map map;
+    public GameDisplay view;
 
     public GameEngine() {
         player = new Player();
         map = generateInitialMap();
     }
 
-    private void printState(Map map, String displayName) {
-        Print resourcesPrinter = new Print(displayName, 2);
-
-        resourcesPrinter.addColumn(new Print.Column("Resource Type"));
-        resourcesPrinter.addColumn(new Print.Column("Max"));
-        resourcesPrinter.addColumn(new Print.Column("Amount"));
-
-        resourcesPrinter.addRow(new Print.Row(
-                "Wood",
-                Integer.toString(map.getTownHall().getWoodCapacity()),
-                Integer.toString(map.getTownHall().getCurrentWood())));
-
-        resourcesPrinter.addRow(new Print.Row(
-                "Iron",
-                Integer.toString(map.getTownHall().getIronCapacity()),
-                Integer.toString(map.getTownHall().getCurrentIron())));
-
-        resourcesPrinter.addRow(new Print.Row(
-                "Gold",
-                Integer.toString(map.getTownHall().getGoldCapacity()),
-                Integer.toString(map.getTownHall().getCurrentGold())));
-
-        Print.print(resourcesPrinter.createTable(true, false, true));
-
-        Print buildingPrinter = new Print("Village Buildings", 2, resourcesPrinter.getWidth());
-        buildingPrinter.addColumn(new Print.Column("Name"));
-        buildingPrinter.addColumn(new Print.Column("Level"));
-        buildingPrinter.addColumn(new Print.Column("Health"));
-
-        for (Building b : map.contains)
-            buildingPrinter.addRow(new Print.Row(b.getClass().getSimpleName(),
-                    Integer.toString(b.getLevel() + 1),
-                    Integer.toString(b.getHealth())));
-
-        Print.print(buildingPrinter.createTable(true, false, true));
-
-        Print inhabs = new Print("Village Inhabitants", 2, buildingPrinter.getWidth());
-        inhabs.addColumn(new Print.Column("Name"));
-        inhabs.addColumn(new Print.Column("Level"));
-
-        for (Inhabitant i : map.inhabitants)
-            inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel() + 1)));
-
-        Print.print(inhabs.createTable(true, true, true));
-    }
-
-    private void printMenuOptions() {
-        System.out.println("\n~ Player Options:\n" +
-                "1. Build {command: '1 <building name>'}\n" +
-                "2. Train inhabitants {command: '2 <unit name>'}\n"+
-                "3. Upgrade {command: '3 i<index>'} / {command: '3 b<index>'}\n"+
-                "4. Explore\n"+
-                "5. Print Village Stats\n"+
-                "6. Quit\n" +
-                "7. Attack last explored\n");
-    }
-
     public void attackVillage(Map map) {
-        int defenseiveCounter = 1;
-        int inhabCounter = 0;
-        for (Building b : map.contains)
-            if (b instanceof DefenseBuilding)
-                defenseiveCounter++;
-        for (Inhabitant i : map.inhabitants)
-            if (i instanceof Infantry)
-                inhabCounter++;
-        pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
-        if (pillageFactor < 0)
-            pillageFactor = 0;
-        if (pillageFactor > 1)
-            pillageFactor = 1;
-        this.map.getTownHall().addWood((int) (map.getTownHall().getCurrentWood() * pillageFactor));
-        this.map.getTownHall().addIron((int) (map.getTownHall().getCurrentIron() * pillageFactor));
-        this.map.getTownHall().addGold((int) (map.getTownHall().getCurrentGold() * pillageFactor));
+//        int defenseiveCounter = 1;
+//        int inhabCounter = 0;
+//        for (Building b : map.contains)
+//            if (b instanceof DefenseBuilding)
+//                defenseiveCounter++;
+//        for (Inhabitant i : map.inhabitants)
+//            if (i instanceof Infantry)
+//                inhabCounter++;
+//        pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
+//        if (pillageFactor < 0)
+//            pillageFactor = 0;
+//        if (pillageFactor > 1)
+//            pillageFactor = 1;
+//        this.map.getTownHall().addWood((int) (map.getTownHall().getCurrentWood() * pillageFactor));
+//        this.map.getTownHall().addIron((int) (map.getTownHall().getCurrentIron() * pillageFactor));
+//        this.map.getTownHall().addGold((int) (map.getTownHall().getCurrentGold() * pillageFactor));
+        ChallengeAdapter adapter = new ChallengeAdapter(this.map);
+        adapter.attack(map);
     }
 
     private Map generateInitialMap(){
@@ -200,11 +147,12 @@ public class GameEngine<T> implements Runnable {
 
     @Override
     public void run() {
-        BufferedReader rd = new BufferedReader(new InputStreamReader(System.in));
-        Scanner sc = new Scanner(rd);
-        printState(this.map,"Current Village State");
-        printMenuOptions();
-        System.out.println();
+        String in;
+
+        view = new GameDisplay();
+        view.printVillageState(this.map,"Current Village State");
+        view.printGameMenu();
+
         Map exploringMap = null;
         boolean deleteMyHeart = true;
         while (running) {
@@ -214,11 +162,10 @@ public class GameEngine<T> implements Runnable {
                 }
             }
             try {
-                if (rd.ready()) {
-                    String in = sc.nextLine();
+                if ((in = view.nextInput()) != null) {
                     String[] args = in.split(" ");
-                    System.out.println("Your Input: ");
-                    System.out.println("\t->" + in + '\n');
+
+                    view.printLastInput();
                     // reset the map if they aren't exploring
                     if (in.charAt(0) != '4')
                         deleteMyHeart = true;
@@ -227,7 +174,8 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                Building type = determineBuildingType(args[1]);
+                                BuildingFactory bfactory = new BuildingFactory();
+                                Building type = bfactory.getBuilding(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid building!");
                                 else if (this.map.build(new Tile(), type) ) {
@@ -240,7 +188,8 @@ public class GameEngine<T> implements Runnable {
                             if (args.length < 2) {
                                 System.err.println("Args must include type!");
                             } else {
-                                Inhabitant type = determineInhabitantType(args[1]);
+                                InhabitantFactory ifactory = new InhabitantFactory();
+                                Inhabitant type = ifactory.getInhabitant(args[1]);
                                 if (type == null)
                                     System.err.println("Args are not a valid inhabitant!");
                                 else if (this.map.train(type) ) {
@@ -275,7 +224,7 @@ public class GameEngine<T> implements Runnable {
                         case '4':
                             deleteMyHeart = false;
                             exploringMap = generateMap();
-                            printState(exploringMap, "Other Village");
+                            view.printVillageState(exploringMap,"Other Village");
                             break;
                         case '7':
                             if (exploringMap != null)
@@ -284,7 +233,7 @@ public class GameEngine<T> implements Runnable {
                                 System.out.println("Error: Explored map is null. Have you explored last command?");
                             break;
                         case '5':
-                            printState(this.map,"Home Village");
+                            view.printVillageState(this.map,"Home Village");
                             break;
                         case '6':
                             System.exit(0);
@@ -292,7 +241,7 @@ public class GameEngine<T> implements Runnable {
                         default:
                             break;
                     }
-                    printMenuOptions();
+                    view.printGameMenu();
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -300,53 +249,17 @@ public class GameEngine<T> implements Runnable {
             if (deleteMyHeart)
                 exploringMap = null;
         }
+        save("test.xml", this.map);
     }
 
-    private static char determineChar(String str){
-        char c = ' ';
-        if (str.trim().length() == 1)
-            c = str.charAt(0);
-        return c;
-    }
-
-    private static Building determineBuildingType(String argument){
-        argument = argument.toLowerCase();
-        char c = determineChar(argument);
-
-        if (argument.contains("gold") || argument.contains("good") || c == 'g') {
-            return new SaulGoodMine(ResourceStages.goldStages[0]);
-        } else if (argument.contains("iron") || c == 'i') {
-            return new IronMine(ResourceStages.ironStages[0]);
-        } else if (argument.contains("wood") || argument.contains("lumber") || c == 'w' || c == 'l') {
-            return new LumberMine(ResourceStages.woodStages[0]);
-        } else if (argument.contains("archer") || c == 'a') {
-            return new ArcherTower();
-        } else if (argument.contains("can") || c == 'c') {
-            return new Cannon();
+    public void save(String file, Map map){
+        try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(Files.newOutputStream(Paths.get(file))))) {
+            map.contains.forEach(encoder::writeObject);
+            map.inhabitants.forEach(encoder::writeObject);
+            System.out.println("Wrote map");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        return null;
-    }
-
-    private static Inhabitant determineInhabitantType(String argument) {
-        argument = argument.toLowerCase();
-        char c = determineChar(argument);
-
-        if (argument.contains("soldier") || c == 's') {
-            return new Soldier();
-        } else if (argument.contains("knight") || c == 'k') {
-            return new Knight();
-        } else if (argument.contains("work") || c == 'w') {
-            return new Worker();
-        } else if (argument.contains("collect") || c == 'c') {
-            return new Collector();
-        } else if (argument.contains("cat")) {
-            return new Catapult();
-        } else if (argument.contains("arch") || c == 'a') {
-            return new Archer();
-        }
-
-        return null;
     }
 
 }

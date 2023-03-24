@@ -1,8 +1,9 @@
 package ca.cosc3p91.a3.gameobjects;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public abstract class Building {
+public abstract class Building implements Serializable {
 
     // members
     private int level;

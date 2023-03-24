@@ -1,11 +1,9 @@
 package ca.cosc3p91.a3.gameobjects;
 
-import ca.cosc3p91.a3.game.Map;
+import java.io.Serializable;
 
-public interface Inhabitant {
+public interface Inhabitant extends Serializable {
 
-    Map map = null;
-    Building building = null;
     int lvl = 0;
 
     void move(Tile t);

@@ -1,6 +1,8 @@
 package ca.cosc3p91.a3.util;
 
-public class Time {
+import java.io.Serializable;
+
+public class Time implements Serializable {
 
     private long timeSeconds;
 
