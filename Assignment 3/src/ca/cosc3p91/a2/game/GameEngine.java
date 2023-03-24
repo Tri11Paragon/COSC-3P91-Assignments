@@ -146,7 +146,6 @@ public class GameEngine<T> implements Runnable {
         view.printVillageState(this.map,"Current Village State");
         view.printGameMenu();
 
-        System.out.println();
         Map exploringMap = null;
         boolean deleteMyHeart = true;
         while (running) {
@@ -158,8 +157,8 @@ public class GameEngine<T> implements Runnable {
             try {
                 if ((in = view.nextInput()) != null) {
                     String[] args = in.split(" ");
-                    System.out.println("Your Input: ");
-                    System.out.println("\t->" + in + '\n');
+
+                    view.printLastInput();
                     // reset the map if they aren't exploring
                     if (in.charAt(0) != '4')
                         deleteMyHeart = true;

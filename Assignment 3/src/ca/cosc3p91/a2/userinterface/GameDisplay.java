@@ -22,8 +22,13 @@ public class GameDisplay {
 
     public String nextInput() throws IOException {
         if (reader.ready()) {
-            return scanner.nextLine();
+            return (input = scanner.nextLine());
         } else return null;
+    }
+
+    public void printLastInput() {
+        System.out.println("\nYour Input: ");
+        System.out.println("\t->" + input + '\n');
     }
 
     public void printVillageState(Map map, String displayName) {
