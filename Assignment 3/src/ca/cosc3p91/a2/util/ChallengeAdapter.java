@@ -35,7 +35,7 @@ public class ChallengeAdapter {
                     .filter(b -> b instanceof DefenseBuilding)
                     .map(b -> (DefenseBuilding) b)
                     .forEach(d -> {
-                entityDefenseList.add(new ChallengeDefense<>((double) d.getDamage(), (double) b.getHealth()));
+                entityDefenseList.add(new ChallengeDefense<>((double) d.getDamage(), (double) d.getHealth()));
             });
 
             return entityDefenseList;
