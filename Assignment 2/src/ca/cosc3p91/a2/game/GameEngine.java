@@ -1,10 +1,10 @@
-package ca.cosc3p91.a3.game;
+package ca.cosc3p91.a4.game;
 
-import ca.cosc3p91.a3.gameobjects.*;
-import ca.cosc3p91.a3.player.*;
-import ca.cosc3p91.a3.util.Print;
-import ca.cosc3p91.a3.util.Time;
-import ca.cosc3p91.a3.util.Util;
+import ca.cosc3p91.a4.gameobjects.*;
+import ca.cosc3p91.a4.player.*;
+import ca.cosc3p91.a4.util.Print;
+import ca.cosc3p91.a4.util.Time;
+import ca.cosc3p91.a4.util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;

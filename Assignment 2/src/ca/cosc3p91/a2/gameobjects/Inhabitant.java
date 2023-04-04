@@ -1,6 +1,6 @@
-package ca.cosc3p91.a3.gameobjects;
+package ca.cosc3p91.a4.gameobjects;
 
-import ca.cosc3p91.a3.game.Map;
+import ca.cosc3p91.a4.game.Map;
 
 public interface Inhabitant {
 

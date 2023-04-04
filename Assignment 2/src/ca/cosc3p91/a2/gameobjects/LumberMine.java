@@ -1,4 +1,4 @@
-package ca.cosc3p91.a3.gameobjects;
+package ca.cosc3p91.a4.gameobjects;
 
 public class LumberMine extends ResourceBuilding {
 

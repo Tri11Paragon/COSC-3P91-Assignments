@@ -1,7 +1,7 @@
-package ca.cosc3p91.a3;
+package ca.cosc3p91.a4;
 
-import ca.cosc3p91.a3.game.GameEngine;
-import ca.cosc3p91.a3.gameobjects.Stage;
+import ca.cosc3p91.a4.game.GameEngine;
+import ca.cosc3p91.a4.gameobjects.Stage;
 
 public class Main {
 
