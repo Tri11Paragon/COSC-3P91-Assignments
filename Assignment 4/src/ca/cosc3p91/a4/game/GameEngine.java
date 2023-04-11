@@ -9,6 +9,7 @@ import ca.cosc3p91.a4.util.ChallengeAdapter;
 
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
@@ -26,14 +27,16 @@ public class GameEngine implements Runnable {
 
     private int currentTime;
 
+    private final InputStream input;
     private final Random random = new Random(System.nanoTime());
 
     public Map map;
     public GameDisplay view;
 
-    public GameEngine() {
+    public GameEngine(InputStream commandStream) {
         player = new Player();
         map = generateInitialMap();
+        input = commandStream;
     }
 
     public void attackVillage(Map map) {
@@ -149,7 +152,7 @@ public class GameEngine implements Runnable {
     public void run() {
         String in;
 
-        view = new GameDisplay();
+        view = new GameDisplay(input);
         view.printVillageState(this.map,"Current Village State");
         view.printGameMenu();
 
@@ -164,6 +167,8 @@ public class GameEngine implements Runnable {
             try {
                 if ((in = view.nextInput()) != null) {
                     String[] args = in.split(" ");
+
+                    if (in.charAt(0) == '0') continue;
 
                     view.printLastInput();
                     // reset the map if they aren't exploring

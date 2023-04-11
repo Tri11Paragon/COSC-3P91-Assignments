@@ -7,22 +7,21 @@ import ca.cosc3p91.a4.util.Print;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class GameDisplay {
     private BufferedReader reader;
-    private Scanner scanner;
     private String input;
 
-    public GameDisplay() {
-        reader = new BufferedReader(new InputStreamReader(System.in));
-        scanner = new Scanner(reader);
+    public GameDisplay(InputStream readFrom) {
+        reader = new BufferedReader(new InputStreamReader(readFrom));
     }
 
     public String nextInput() throws IOException {
         if (reader.ready()) {
-            return (input = scanner.nextLine());
+            return (input = reader.readLine().trim());
         } else return null;
     }
 
