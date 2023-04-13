@@ -1,30 +1,34 @@
 package ca.cosc3p91.a4.util;
 
-import java.io.BufferedReader;
+import ca.cosc3p91.a4.userinterface.GameDisplay;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Client {
+    GameDisplay view = new GameDisplay(System.in);
+
     public Client(int port) throws IOException {
-        BufferedReader inFromUser =
-                new BufferedReader(new InputStreamReader(System.in));
         DatagramSocket clientSocket = new DatagramSocket();
         InetAddress IPAddress = InetAddress.getByName("localhost");
+        String prompt;
         byte[] sendData = new byte[1024];
         byte[] receiveData = new byte[1024];
-        String sentence = inFromUser.readLine();
-        sendData = sentence.getBytes();
-        DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-        clientSocket.send(sendPacket);
-        /*
-        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-        clientSocket.receive(receivePacket);
-        String modifiedSentence = new String(receivePacket.getData());
-        System.out.println("FROM SERVER:" + modifiedSentence);
-         */
+        while (true) {
+            if ((prompt = view.nextInput()) != null) {
+                if (!prompt.isEmpty() && prompt.charAt(0) == '6') break;
+                sendData = prompt.getBytes();
+                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
+                clientSocket.send(sendPacket);
+                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+                clientSocket.receive(receivePacket);
+                String serverOutput = new String(receivePacket.getData()).trim();
+                System.out.println(">" + serverOutput);
+                view.printGameMenu();
+            }
+        }
         clientSocket.close();
     }
 }

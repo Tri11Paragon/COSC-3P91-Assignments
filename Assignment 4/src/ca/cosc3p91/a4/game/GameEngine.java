@@ -8,8 +8,7 @@ import ca.cosc3p91.a4.userinterface.GameDisplay;
 import ca.cosc3p91.a4.util.ChallengeAdapter;
 
 import java.beans.XMLEncoder;
-import java.io.BufferedOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
@@ -22,21 +21,25 @@ public class GameEngine implements Runnable {
 
     private Player player;
     boolean running = true;
+    public boolean execFlag = true;
 
     private float pillageFactor = 0.5f;
 
     private int currentTime;
 
     private final InputStream input;
+    private final OutputStream output;
+    public ObjectOutputStream mapOutput;
     private final Random random = new Random(System.nanoTime());
 
     public Map map;
     public GameDisplay view;
 
-    public GameEngine(InputStream commandStream) {
+    public GameEngine(InputStream commandStream, OutputStream outputBuf) {
         player = new Player();
         map = generateInitialMap();
         input = commandStream;
+        output = outputBuf;
     }
 
     public void attackVillage(Map map) {
@@ -159,15 +162,15 @@ public class GameEngine implements Runnable {
         Map exploringMap = null;
         boolean deleteMyHeart = true;
         while (running) {
+            execFlag = true;
             for (Building b : this.map.contains){
                 if ((b instanceof ResourceBuilding)) {
                     ((ResourceBuilding) b).update(this.map.getTownHall());
                 }
             }
             try {
-                if ((in = view.nextInput()) != null) {
+                if ((in = view.nextInput()) != null && !in.isEmpty()) {
                     String[] args = in.split(" ");
-
                     if (in.charAt(0) == '0') continue;
 
                     view.printLastInput();
@@ -177,52 +180,53 @@ public class GameEngine implements Runnable {
                     switch (in.charAt(0)) {
                         case '1':
                             if (args.length < 2) {
-                                System.err.println("Args must include type!");
+                                output.write("Args must include type".getBytes());
                             } else {
                                 BuildingFactory bfactory = new BuildingFactory();
                                 Building type = bfactory.getBuilding(args[1]);
-                                if (type == null)
-                                    System.err.println("Args are not a valid building!");
-                                else if (this.map.build(new Tile(), type) ) {
-                                    System.out.println(type.getClass().getSimpleName()+" successfully built\n");
-                                } else
-                                    System.out.println("Missing resources to build "+type.getClass().getSimpleName());
+                                if (type == null) {
+                                    output.write("Args are not a valid building!".getBytes());
+                                } else if (this.map.build(new Tile(), type) ) {
+                                    output.write((type.getClass().getSimpleName()+" successfully built\n").getBytes());
+                                } else {
+                                    output.write(("Missing resources to build "+type.getClass().getSimpleName()).getBytes());
+                                }
                             }
                             break;
                         case '2':
                             if (args.length < 2) {
-                                System.err.println("Args must include type!");
+                                output.write("Args must include type".getBytes());
                             } else {
                                 InhabitantFactory ifactory = new InhabitantFactory();
                                 Inhabitant type = ifactory.getInhabitant(args[1]);
-                                if (type == null)
-                                    System.err.println("Args are not a valid inhabitant!");
-                                else if (this.map.train(type) ) {
-                                    System.out.println("successfully trained a(n) "+type.getClass().getSimpleName());
-                                } else System.out.println("Missing gold to train "+type.getClass().getSimpleName());
+                                if (type == null) {
+                                    output.write("Args are not a valid inhabitant!".getBytes());
+                                } else if (this.map.train(type) ) {
+                                    output.write(("successfully trained a(n) "+type.getClass().getSimpleName()).getBytes());
+                                } else output.write(("Missing resources to train "+type.getClass().getSimpleName()).getBytes());
                             }
                             break;
                         case '3':
                             if (args.length < 2) {
-                                System.err.println("Args must include type!");
+                                output.write("Args must include type".getBytes());
                             } else {
                                 int unitIndex = Integer.parseInt(args[1].substring(1));
 
                                 if (unitIndex < 0) {
-                                    System.err.println("Invalid Index");
+                                    output.write("Invalid Index".getBytes());
                                     break;
                                 }
 
                                 if (args[1].contains("i") && (unitIndex < map.inhabitants.size()) ) {
                                     if ( map.upgradeInhabitant(unitIndex) ) {
-                                        System.out.println("successfully upgraded a(n) "+map.inhabitants.get(unitIndex).getClass().getSimpleName());
-                                    } else System.out.println("Missing Resources to upgrade "+map.inhabitants.get(unitIndex).getClass().getSimpleName());
+                                        output.write(("successfully upgraded a(n) "+map.inhabitants.get(unitIndex).getClass().getSimpleName()).getBytes());
+                                    } else output.write(("Missing Resources to upgrade "+map.inhabitants.get(unitIndex).getClass().getSimpleName()).getBytes());
                                 } else if (args[1].contains("b") && (unitIndex < map.contains.size()) ) {
                                     if ( map.upgradeBuilding(unitIndex) ) {
-                                        System.out.println("successfully upgraded a(n) "+map.contains.get(unitIndex).getClass().getSimpleName());
-                                    } else System.out.println("Missing Resources to upgrade "+map.contains.get(unitIndex).getClass().getSimpleName());
+                                        output.write(("successfully upgraded a(n) "+map.contains.get(unitIndex).getClass().getSimpleName()).getBytes());
+                                    } else output.write(("Missing Resources to upgrade "+map.contains.get(unitIndex).getClass().getSimpleName()).getBytes());
                                 } else {
-                                    System.err.println("Args are not a valid unit!");
+                                    output.write("Args is not a valid unit".getBytes());
                                 }
                             }
                             break;
@@ -253,6 +257,7 @@ public class GameEngine implements Runnable {
             }
             if (deleteMyHeart)
                 exploringMap = null;
+            execFlag = false;
         }
         save("test.xml", this.map);
     }

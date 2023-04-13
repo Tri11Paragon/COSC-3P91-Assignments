@@ -2,10 +2,11 @@ package ca.cosc3p91.a4.game;
 
 import ca.cosc3p91.a4.gameobjects.*;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Map {
+public class Map implements Serializable {
 
     static int MAXSIZE = 50;
 
