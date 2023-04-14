@@ -47,4 +47,7 @@ public class Time implements Serializable {
         return new Time(System.currentTimeMillis() / 1000);
     }
 
+    public Time difference(Time right) {
+        return new Time(this.timeSeconds - right.timeSeconds);
+    }
 }

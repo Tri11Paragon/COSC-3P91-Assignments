@@ -7,7 +7,9 @@ import java.net.*;
 import java.rmi.ServerException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Queue;
 import java.util.Random;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Server implements Runnable {
 
@@ -35,6 +37,7 @@ public class Server implements Runnable {
             byte[] receiveData = new byte[PACKET_SIZE];
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             try {
+                // BLOCKING!
                 socket.receive(receivePacket);
 
                 DataInputStream stream = new DataInputStream(new ByteArrayInputStream(receivePacket.getData()));
@@ -42,17 +45,21 @@ public class Server implements Runnable {
                 byte packetID = stream.readByte();
                 long clientID = stream.readLong();
 
+                ConnectedClient client = clients.get(clientID);
+
                 if (packetID == PacketTable.CONNECT){
                     clients.put(++clientAssignmentID, new ConnectedClient(socket, clientID, receivePacket.getAddress(), receivePacket.getPort()));
                 } else if (packetID == PacketTable.DISCONNECT){
+                    if (client == null)
+                        throw new ServerException("Client disconnected with invalid client id! (" + clientID + ")");
+                    client.halt();
                     clients.put(clientID, null);
                 } else {
-                    ConnectedClient client = clients.get(clientID);
                     if (client == null)
-                        throw new ServerException("Client Connected with invalid client id! (" + clientID + ")");
+                        throw new ServerException("Client message with invalid client id! (" + clientID + ")");
                     client.handleRequest(new ConnectedClient.ServerRequest(packetID, stream));
                 }
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
@@ -65,42 +72,48 @@ public class Server implements Runnable {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         new Server();
-        byte[] receiveData = new byte[1284];
-        byte[] sendData = new byte[1284];
-        stream_in = new ByteArrayInputStream(receiveData);
-        stream_out = new ByteArrayOutputStream(1284);
-        new Thread(mainEngine = new GameEngine()).start();
-        while(true) {
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            serverSocket.receive(receivePacket);
-            stream_in.reset();
-            Thread.sleep(500);
-            InetAddress IPAddress = receivePacket.getAddress();
-            int port = receivePacket.getPort();
-            sendData = stream_out.toByteArray();
-            stream_out.reset();
-            DatagramPacket sendPacket =
-                    new DatagramPacket(sendData, sendData.length, IPAddress, port);
-            serverSocket.send(sendPacket);
-        }
     }
 
-    private static class ConnectedClient {
+    private static class ConnectedClient implements Runnable {
         private final InetAddress address;
         private final int port;
         private final ArrayList<ServerRequest> requests = new ArrayList<>();
+        // could use read/write lock for some of this, as certain operations, mostly timeout check, won't modify data.
+        private final ReentrantLock requestLock = new ReentrantLock();
         private final DatagramSocket socket;
         private final long clientID;
+        private volatile boolean running = true;
+        private final Thread processingThread;
 
         public ConnectedClient(DatagramSocket socket, long clientID, InetAddress address, int port){
             this.socket = socket;
             this.address = address;
             this.port = port;
             this.clientID = clientID;
+            processingThread = new Thread(this);
+            processingThread.start();
         }
 
         public void handleRequest(ServerRequest request){
+            requestLock.lock();
+            requests.add(request);
+            requestLock.unlock();
+        }
 
+        public void run(){
+            while (running){
+                requestLock.lock();
+                requests.removeIf(ServerRequest::isAck);
+                for (ServerRequest request : requests){
+                    if (request.getTimeSinceReceived().)
+                }
+                requestLock.unlock();
+            }
+        }
+
+        public void halt() throws InterruptedException {
+            running = false;
+            processingThread.join();
         }
 
         private static class ServerRequest {
