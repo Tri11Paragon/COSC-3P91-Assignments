@@ -5,16 +5,14 @@ import ca.cosc3p91.a4.game.GameEngine;
 import java.io.*;
 import java.net.*;
 import java.rmi.ServerException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Queue;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server implements Runnable {
 
     public static final int SERVER_PORT = 42069;
     public static final int PACKET_SIZE = 4096;
+    public static final long MAX_PACKET_ACK_TIME_SECONDS = 30;
 
     private final HashMap<Long, ConnectedClient> clients = new HashMap<>();
     private long clientAssignmentID = 0;
@@ -78,6 +76,7 @@ public class Server implements Runnable {
         private final InetAddress address;
         private final int port;
         private final ArrayList<ServerRequest> requests = new ArrayList<>();
+        private final Queue<ServerRequest> pendingRequests = new PriorityQueue<>();
         // could use read/write lock for some of this, as certain operations, mostly timeout check, won't modify data.
         private final ReentrantLock requestLock = new ReentrantLock();
         private final DatagramSocket socket;
@@ -96,18 +95,30 @@ public class Server implements Runnable {
 
         public void handleRequest(ServerRequest request){
             requestLock.lock();
-            requests.add(request);
+            pendingRequests.add(request);
             requestLock.unlock();
+        }
+
+        private void processRequest(ServerRequest request){
+
         }
 
         public void run(){
             while (running){
                 requestLock.lock();
-                requests.removeIf(ServerRequest::isAck);
-                for (ServerRequest request : requests){
-                    if (request.getTimeSinceReceived().)
+                while (pendingRequests.size() > 0) {
+                    ServerRequest request = pendingRequests.remove();
+                    processRequest(request);
+                    requests.add(request);
                 }
                 requestLock.unlock();
+
+                requests.removeIf(ServerRequest::isAck);
+                for (ServerRequest request : requests){
+                    // TODO:
+                    if (request.getTimeSinceReceived().get() > MAX_PACKET_ACK_TIME_SECONDS)
+                        System.out.println("A packet hasn't received a ack, it might have been lost!");
+                }
             }
         }
 
