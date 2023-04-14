@@ -17,8 +17,8 @@ public class Server implements Runnable {
     private final HashMap<Long, ConnectedClient> clients = new HashMap<>();
     private long clientAssignmentID = 0;
     private long lastMessageID = 0;
-    private DatagramSocket socket;
-    private Thread ioThread;
+    private final DatagramSocket socket;
+    private final Thread ioThread;
 
     private GameEngine mainEngine;
 
@@ -43,7 +43,7 @@ public class Server implements Runnable {
                 long clientID = stream.readLong();
 
                 if (packetID == PacketTable.CONNECT){
-                    clients.put(++clientAssignmentID, new ConnectedClient(socket, clientID receivePacket.getAddress(), receivePacket.getPort()));
+                    clients.put(++clientAssignmentID, new ConnectedClient(socket, clientID, receivePacket.getAddress(), receivePacket.getPort()));
                 } else if (packetID == PacketTable.DISCONNECT){
                     clients.put(clientID, null);
                 } else {
@@ -69,7 +69,7 @@ public class Server implements Runnable {
         byte[] sendData = new byte[1284];
         stream_in = new ByteArrayInputStream(receiveData);
         stream_out = new ByteArrayOutputStream(1284);
-        new Thread(mainEngine = new GameEngine(stream_in,stream_out)).start();
+        new Thread(mainEngine = new GameEngine()).start();
         while(true) {
             DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
             serverSocket.receive(receivePacket);
