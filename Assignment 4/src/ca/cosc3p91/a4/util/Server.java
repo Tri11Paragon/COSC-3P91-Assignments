@@ -100,7 +100,15 @@ public class Server implements Runnable {
         }
 
         private void processRequest(ServerRequest request){
-
+            try {
+                switch (request.getID()){
+                    case PacketTable.ACK:
+                            long messageID = request.getDataStream().readLong();
+                        break;
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
 
         public void run(){
