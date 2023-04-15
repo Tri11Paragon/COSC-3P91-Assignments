@@ -94,9 +94,7 @@ public class Server implements Runnable {
             processingThread = new Thread(this);
             processingThread.start();
 
-            ByteArrayOutputStream bstream = new ByteArrayOutputStream();
-            DataOutputStream stream = new DataOutputStream(bstream);
-            sendMessage(new Message.Sent(PacketTable.ACK, clientID, messageID, stream, bstream));
+            sendMessage(new Message.Sent(PacketTable.ACK, clientID, messageID));
         }
 
         public void handleRequest(Message.Received request){
@@ -129,8 +127,10 @@ public class Server implements Runnable {
             while (running){
                 // handle request processing without blocking the I/O thread
                 requestLock.lock();
-                Message.Received request = pendingRequests.remove();
-                processRequest(request);
+                if (!pendingRequests.isEmpty()) {
+                    Message.Received request = pendingRequests.remove();
+                    processRequest(request);
+                }
                 requestLock.unlock();
 
                 for (Map.Entry<Long, Message.Sent> message : sentMessages.entrySet()){

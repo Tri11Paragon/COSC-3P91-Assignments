@@ -66,10 +66,10 @@ public class Message {
          * @param writer stream to write to
          * @param data byte array stream which contains the byte[] used in packet construction
          */
-        public Sent(byte packetID, long clientID, long messageID, DataOutputStream writer, ByteArrayOutputStream data) {
+        public Sent(byte packetID, long clientID, long messageID) {
             super(packetID, clientID, messageID);
-            this.writer = writer;
-            this.data = data;
+            this.data = new ByteArrayOutputStream();
+            this.writer = new DataOutputStream(this.data);
             timeSent = Time.getTime();
             // write the header to the stream, make sure you don't write into the stream before constructing this!
             try {

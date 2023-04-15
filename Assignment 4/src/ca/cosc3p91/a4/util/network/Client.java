@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Client implements Runnable {
     private GameDisplay view = new GameDisplay();
@@ -15,26 +17,27 @@ public class Client implements Runnable {
     private DatagramSocket clientSocket;
     private boolean running = true;
     private Thread receiveThread;
+    private final HashMap<Long, Message.Sent> sentMessages = new HashMap<>();
+    private int lastMessageID = 0;
+    private final InetAddress serverAddress;
 
     public Client(String address) throws IOException {
-        InetAddress serverAddress = InetAddress.getByName(address);
+        serverAddress = InetAddress.getByName(address);
         clientSocket = new DatagramSocket();
         receiveThread = new Thread(this);
         receiveThread.start();
 
+        sendMessage(new Message.Sent(PacketTable.CONNECT, 0, ++lastMessageID));
+
         String prompt;
-        byte[] sendData = new byte[1024];
-        byte[] receiveData = new byte[1024];
         while (running) {
             if ((prompt = view.nextInput()) != null) {
-                if (!prompt.isEmpty() && prompt.charAt(0) == '6') break;
-                sendData = prompt.getBytes();
-                DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, port);
-                clientSocket.send(sendPacket);
-                DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                clientSocket.receive(receivePacket);
-                String serverOutput = new String(receivePacket.getData()).trim();
-                System.out.println(">" + serverOutput);
+                if (prompt.trim().isEmpty())
+                    continue;
+                if (prompt.charAt(0) == '6')
+                    break;
+
+
                 view.printGameMenu();
             }
         }
@@ -54,11 +57,34 @@ public class Client implements Runnable {
                 long clientID = stream.readLong();
                 long messageID = stream.readLong();
 
-
+                switch (packetID) {
+                    case PacketTable.ACK:
+                        Message.Sent message = sentMessages.get(messageID);
+                        if (message == null)
+                            throw new RuntimeException("Server message sync error!");
+                        message.acknowledged();
+                        sentMessages.remove(messageID);
+                        System.out.println("Message acknowledged " + messageID);
+                        break;
+                    case PacketTable.DISCONNECT:
+                        running = false;
+                        break;
+                }
 
             } catch (Exception e){
                 e.printStackTrace();
             }
+        }
+    }
+
+    private void sendMessage(Message.Sent message){
+        sentMessages.put(message.getMessageID(), message);
+        byte[] data = message.getData().toByteArray();
+        DatagramPacket sendPacket = new DatagramPacket(data, data.length, serverAddress, Server.SERVER_PORT);
+        try {
+            clientSocket.send(sendPacket);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
