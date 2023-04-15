@@ -1,4 +1,4 @@
-package ca.cosc3p91.a4.util;
+package ca.cosc3p91.a4.util.network;
 
 import ca.cosc3p91.a4.userinterface.GameDisplay;
 
@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 
 public class Client {
-    GameDisplay view = new GameDisplay(System.in);
+    GameDisplay view = new GameDisplay();
 
     public Client(int port) throws IOException {
         DatagramSocket clientSocket = new DatagramSocket();

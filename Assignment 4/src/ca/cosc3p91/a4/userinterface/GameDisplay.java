@@ -15,8 +15,8 @@ public class GameDisplay {
     private BufferedReader reader;
     private String input;
 
-    public GameDisplay(InputStream readFrom) {
-        reader = new BufferedReader(new InputStreamReader(readFrom));
+    public GameDisplay() {
+        reader = new BufferedReader(new InputStreamReader(System.in));
     }
 
     public String nextInput() throws IOException {

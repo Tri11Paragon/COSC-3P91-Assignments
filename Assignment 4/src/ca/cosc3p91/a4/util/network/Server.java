@@ -1,6 +1,7 @@
-package ca.cosc3p91.a4.util;
+package ca.cosc3p91.a4.util.network;
 
 import ca.cosc3p91.a4.game.GameEngine;
+import ca.cosc3p91.a4.util.Time;
 
 import java.io.*;
 import java.net.*;
@@ -139,6 +140,7 @@ public class Server implements Runnable {
             private final byte id;
             private final Time receiveTime;
             private final DataInputStream receive;
+            // ack should be on messages send to the client, which the client acks!
             private boolean ack = false;
 
             public ServerRequest(byte id, DataInputStream receive){
