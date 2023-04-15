@@ -1,5 +1,8 @@
 package ca.cosc3p91.a4.util.network;
 
+import ca.cosc3p91.a4.util.Time;
+
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 
@@ -26,31 +29,76 @@ public class Message {
         return messageID;
     }
 
-    public static class ReceivedMessage extends Message {
+    public static class Received extends Message {
 
         private final DataInputStream reader;
+        private final byte[] data;
 
-        public ReceivedMessage(byte packetID, long clientID, long messageID, DataInputStream reader) {
+        public Received(byte packetID, long clientID, long messageID, DataInputStream reader, byte[] data) {
             super(packetID, clientID, messageID);
             this.reader = reader;
+            this.data = data;
         }
 
         public DataInputStream getReader(){
             return reader;
         }
+
+        public byte[] getData(){
+            return data;
+        }
     }
 
-    public static class SentMessage extends Message {
+    public static class Sent extends Message {
 
         private final DataOutputStream writer;
+        private final ByteArrayOutputStream data;
+        private boolean ack = false;
+        private final Time timeSent;
 
-        public SentMessage(byte packetID, long clientID, long messageID, DataOutputStream writer) {
+        /**
+         * A message packet which will be sent to a client or the server, contains the standard message header and
+         * writes the header to the stream, make sure you don't write into the stream before constructing this!
+         *
+         * @param packetID type of this message
+         * @param clientID the client id, if this is going to the client it is unlikely to be used but should always be correct!
+         * @param messageID client specific message id, used to reference/acknowledge messages
+         * @param writer stream to write to
+         * @param data byte array stream which contains the byte[] used in packet construction
+         */
+        public Sent(byte packetID, long clientID, long messageID, DataOutputStream writer, ByteArrayOutputStream data) {
             super(packetID, clientID, messageID);
             this.writer = writer;
+            this.data = data;
+            timeSent = Time.getTime();
+            // write the header to the stream, make sure you don't write into the stream before constructing this!
+            try {
+                writer.writeByte(packetID);
+                writer.writeLong(clientID);
+                writer.writeLong(messageID);
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+
+        public void acknowledged(){
+            this.ack = true;
+        }
+
+        public boolean isAcknowledged(){
+            return ack;
         }
 
         public DataOutputStream getWriter(){
             return writer;
+        }
+
+        public Time getTimeSinceSent(){
+            return Time.getTime().difference(timeSent);
+        }
+
+        public ByteArrayOutputStream getData(){
+            return data;
         }
     }
 

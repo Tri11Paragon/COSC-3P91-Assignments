@@ -6,7 +6,7 @@ import java.io.*;
 public class Main {
 
     public static void main(String[] args) throws IOException {
-        Client gameClient = new Client(42069);
+        Client gameClient = new Client("localhost");
     }
 
 }
