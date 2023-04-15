@@ -57,7 +57,7 @@ public class GameEngine implements Runnable {
         adapter.attack(map);
     }
 
-    private Map generateInitialMap(){
+    public Map generateInitialMap(){
         return new Map(new CasaDeNarino(1, VillageHallStages.villageStages[0]), 30);
     }
 

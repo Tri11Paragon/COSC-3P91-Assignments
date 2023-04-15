@@ -16,5 +16,7 @@ public class PacketTable {
     public static final byte ACK = 0x3;
     // messageHeader, UTF8 String with length information (use DOS.writeUTF/DIS.readUTF)
     public static final byte MESSAGE = 0x4;
+    // messageHeader, serial packets with map info
+    public static final byte MAP_DATA = 0x5;
 
 }

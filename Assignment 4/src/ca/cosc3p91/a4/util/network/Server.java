@@ -1,11 +1,15 @@
 package ca.cosc3p91.a4.util.network;
 
 import ca.cosc3p91.a4.game.GameEngine;
+import ca.cosc3p91.a4.game.Map;
 
 import java.io.*;
 import java.net.*;
 import java.rmi.ServerException;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server implements Runnable {
@@ -49,7 +53,7 @@ public class Server implements Runnable {
 
                 // the server must handle connection requests while the client's processing thread will handle all other messages
                 if (packetID == PacketTable.CONNECT){
-                    clients.put(++clientAssignmentID, new ConnectedClient(socket, clientID, messageID, receivePacket.getAddress(), receivePacket.getPort()));
+                    clients.put(++clientAssignmentID, new ConnectedClient(socket, mainEngine, clientID, messageID, receivePacket.getAddress(), receivePacket.getPort()));
                 } else if (packetID == PacketTable.DISCONNECT) {
                     if (client == null)
                         throw new ServerException("Client disconnected with invalid client id! (" + clientID + ")");
@@ -85,12 +89,14 @@ public class Server implements Runnable {
         private final long clientID;
         private volatile boolean running = true;
         private final Thread processingThread;
+        private final Map clientMap;
 
-        public ConnectedClient(DatagramSocket serverSocket, long clientID, long messageID, InetAddress address, int port){
+        public ConnectedClient(DatagramSocket serverSocket, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
             this.serverSocket = serverSocket;
             this.address = address;
             this.port = port;
             this.clientID = clientID;
+            this.clientMap = engine.generateInitialMap();
             processingThread = new Thread(this);
             processingThread.start();
 
@@ -133,7 +139,7 @@ public class Server implements Runnable {
                 }
                 requestLock.unlock();
 
-                for (Map.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
+                for (HashMap.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
                     if (message.getValue().getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
                         System.out.println("The server did not process our message, did they receive it?");
                         // todo: resend message
