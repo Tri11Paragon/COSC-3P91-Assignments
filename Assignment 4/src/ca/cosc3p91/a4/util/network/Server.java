@@ -10,6 +10,7 @@ import java.rmi.ServerException;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server implements Runnable {
@@ -84,11 +85,13 @@ public class Server implements Runnable {
         private final int port;
         private final Queue<Message.Received> pendingRequests = new PriorityQueue<>();
         private final ReentrantLock requestLock = new ReentrantLock();
+        private final AtomicBoolean allowUpdate;
         private final HashMap<Long, Message.Sent> sentMessages = new HashMap<>();
         private final DatagramSocket serverSocket;
         private final long clientID;
         private volatile boolean running = true;
         private final Thread processingThread;
+        private final Thread gameEngineThread;
         private final Map clientMap;
 
         public ConnectedClient(DatagramSocket serverSocket, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
@@ -97,8 +100,17 @@ public class Server implements Runnable {
             this.port = port;
             this.clientID = clientID;
             this.clientMap = engine.generateInitialMap();
+            this.allowUpdate = new AtomicBoolean(true);
             processingThread = new Thread(this);
             processingThread.start();
+            gameEngineThread = new Thread(() -> {
+                while (true) {
+                    if (this.allowUpdate.get()) {
+                        engine.updateMap(clientMap);
+                    }
+                }
+            });
+            gameEngineThread.start();
 
             sendMessage(new Message.Sent(PacketTable.ACK, clientID, messageID));
         }
@@ -135,7 +147,9 @@ public class Server implements Runnable {
                 requestLock.lock();
                 if (!pendingRequests.isEmpty()) {
                     Message.Received request = pendingRequests.remove();
+                    allowUpdate.set(false);
                     processRequest(request);
+                    allowUpdate.set(true);
                 }
                 requestLock.unlock();
 

@@ -140,9 +140,9 @@ public class GameEngine {
     }
 
     public void updateMap(Map map) {
-        for (Building b : map.contains){
-            if ((b instanceof ResourceBuilding)) {
-                ((ResourceBuilding) b).update(map.getTownHall());
+        for (int i = 0; i < map.contains.size(); i++) {
+            if ((map.contains.get(i) instanceof ResourceBuilding)) {
+                ((ResourceBuilding) map.contains.get(i)).update(map.getTownHall());
             }
         }
     }
