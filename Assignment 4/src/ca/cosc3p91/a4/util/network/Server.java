@@ -136,7 +136,7 @@ public class Server implements Runnable {
                 for (Map.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
                     if (message.getValue().getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
                         System.out.println("The server did not process our message, did they receive it?");
-                        // todo: resend message
+                        sendMessage(message.getValue());
                     }
                 }
             }
