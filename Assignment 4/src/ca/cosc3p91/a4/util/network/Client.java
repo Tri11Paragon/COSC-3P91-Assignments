@@ -36,7 +36,23 @@ public class Client implements Runnable {
                     continue;
                 if (prompt.charAt(0) == '6')
                     break;
-
+                switch (prompt.charAt(0)) {
+                    case '1':
+                        Message.Sent buildMessage = new Message.Sent(PacketTable.BUILD,0,++lastMessageID);
+                        buildMessage.getData().write(prompt.substring(1).getBytes());
+                        sendMessage(buildMessage);
+                        break;
+                    case '2':
+                        Message.Sent trainMessage = new Message.Sent(PacketTable.TRAIN,0,++lastMessageID);
+                        trainMessage.getData().write(prompt.substring(1).getBytes());
+                        sendMessage(trainMessage);
+                        break;
+                    case '3':
+                        Message.Sent upgradeMessage = new Message.Sent(PacketTable.UPGRADE,0,++lastMessageID);
+                        upgradeMessage.getData().write(prompt.substring(1).getBytes());
+                        sendMessage(upgradeMessage);
+                        break;
+                }
 
                 view.printGameMenu();
             }

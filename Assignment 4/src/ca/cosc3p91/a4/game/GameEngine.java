@@ -139,7 +139,7 @@ public class GameEngine {
         return score;
     }
 
-    public void updateMap(Map map) {
+    public synchronized void updateMap(Map map) {
         for (int i = 0; i < map.contains.size(); i++) {
             if ((map.contains.get(i) instanceof ResourceBuilding)) {
                 ((ResourceBuilding) map.contains.get(i)).update(map.getTownHall());
@@ -147,7 +147,7 @@ public class GameEngine {
         }
     }
 
-    public boolean build (Map map, String buildingArg) {
+    public synchronized boolean build (Map map, String buildingArg) {
         BuildingFactory bfactory = new BuildingFactory();
         Building type = bfactory.getBuilding(buildingArg);
         return map.build(new Tile(), type);
@@ -159,7 +159,7 @@ public class GameEngine {
         return  map.train(type);
     }
 
-    public boolean upgradeBuilding (Map map, int buildingIndex) {
+    public synchronized boolean upgradeBuilding (Map map, int buildingIndex) {
         return map.upgradeBuilding(buildingIndex);
     }
 

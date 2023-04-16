@@ -16,7 +16,13 @@ public class PacketTable {
     public static final byte ACK = 0x3;
     // messageHeader, UTF8 String with length information (use DOS.writeUTF/DIS.readUTF)
     public static final byte MESSAGE = 0x4;
+    // messageHeader, build
+    public static final byte BUILD = 0x5;
+    // messageHeader, train
+    public static final byte TRAIN = 0x6;
+    // messageHeader, upgrade
+    public static final byte UPGRADE = 0x7;
     // messageHeader, serial packets with map info
-    public static final byte MAP_DATA = 0x5;
+    public static final byte USER_MAP_DATA = 0x8;
 
 }
