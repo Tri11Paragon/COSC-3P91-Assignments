@@ -167,6 +167,7 @@ public class Server implements Runnable {
                     if (!sent.isAcknowledged() && sent.getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
                         System.out.println("The client did not acknowledge our message, did they receive it?");
                         sendMessage(sent);
+                        removes.add(message.getKey());
                     }
                 }
                 for (Long l : removes)
