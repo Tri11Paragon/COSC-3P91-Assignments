@@ -29,30 +29,31 @@ public class Client implements Runnable {
 
         sendMessage(new Message.Sent(PacketTable.CONNECT, 0, ++lastMessageID));
 
-        String prompt;
         while (running) {
+            String prompt;
             if ((prompt = view.nextInput()) != null) {
                 if (prompt.trim().isEmpty())
                     continue;
                 if (prompt.charAt(0) == '6')
                     break;
+                byte messageType;
                 switch (prompt.charAt(0)) {
                     case '1':
-                        Message.Sent buildMessage = new Message.Sent(PacketTable.BUILD,0,++lastMessageID);
-                        buildMessage.getData().write(prompt.substring(1).getBytes());
-                        sendMessage(buildMessage);
+                        messageType = PacketTable.BUILD;
                         break;
                     case '2':
-                        Message.Sent trainMessage = new Message.Sent(PacketTable.TRAIN,0,++lastMessageID);
-                        trainMessage.getData().write(prompt.substring(1).getBytes());
-                        sendMessage(trainMessage);
+                        messageType = PacketTable.TRAIN;
                         break;
                     case '3':
-                        Message.Sent upgradeMessage = new Message.Sent(PacketTable.UPGRADE,0,++lastMessageID);
-                        upgradeMessage.getData().write(prompt.substring(1).getBytes());
-                        sendMessage(upgradeMessage);
+                        messageType = PacketTable.UPGRADE;
                         break;
+                    default:
+                        System.err.println("> Invalid command input!");
+                        return;
                 }
+                Message.Sent buildMessage = new Message.Sent(messageType,0,++lastMessageID);
+                buildMessage.getData().write(prompt.substring(1).getBytes());
+                sendMessage(buildMessage);
 
                 view.printGameMenu();
             }
