@@ -7,6 +7,7 @@ import java.io.*;
 import java.net.*;
 import java.rmi.ServerException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -33,6 +34,8 @@ public class Server implements Runnable {
         socket = new DatagramSocket(SERVER_PORT);
         ioThread = new Thread(this);
         ioThread.start();
+
+        mainEngine = new GameEngine();
     }
 
     public void run(){
@@ -50,21 +53,25 @@ public class Server implements Runnable {
                 long clientID = stream.readLong();
                 long messageID = stream.readLong();
 
+                System.out.println("Receiving message with ID " + messageID + " to client: " + clientID + " of type " + packetID);
+
                 ConnectedClient client = clients.get(clientID);
 
                 // the server must handle connection requests while the client's processing thread will handle all other messages
                 if (packetID == PacketTable.CONNECT){
-                    clients.put(++clientAssignmentID, new ConnectedClient(socket, mainEngine, clientID, messageID, receivePacket.getAddress(), receivePacket.getPort()));
-                } else if (packetID == PacketTable.DISCONNECT) {
-                    if (client == null)
-                        throw new ServerException("Client disconnected with invalid client id! (" + clientID + ")");
-                    client.halt();
-                    clients.put(clientID, null);
-                } else {
-                    if (client == null)
-                        throw new ServerException("Client message with invalid client id! (" + clientID + ")");
-                    client.handleRequest(new Message.Received(packetID, clientID, messageID, stream, receivePacket.getData()));
+                    long cid = ++clientAssignmentID;
+                    System.out.println("A client has connected, his clientID is " + cid);
+                    clients.put(cid, new ConnectedClient(socket, mainEngine, cid, messageID, receivePacket.getAddress(), receivePacket.getPort()));
+                    continue;
                 }
+                if (client == null)
+                    throw new ServerException("Client disconnected with invalid client id! (" + clientID + ")");
+                if (packetID == PacketTable.DISCONNECT) {
+                    client.halt();
+                    clients.remove(clientID);
+                    continue;
+                }
+                client.handleRequest(new Message.Received(packetID, clientID, messageID, stream, receivePacket.getData()));
             } catch (IOException | InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -104,7 +111,7 @@ public class Server implements Runnable {
             processingThread = new Thread(this);
             processingThread.start();
             gameEngineThread = new Thread(() -> {
-                while (true) {
+                while (running) {
                     if (this.allowUpdate.get()) {
                         engine.updateMap(clientMap);
                     }
@@ -131,6 +138,7 @@ public class Server implements Runnable {
                         if (message == null)
                             throw new RuntimeException("A message was acknowledged but does not exist!");
                         message.acknowledged();
+                        sentMessages.remove(request.getMessageID());
                         break;
                     case PacketTable.MESSAGE:
                         System.out.println(request.getReader().readUTF());
@@ -153,22 +161,28 @@ public class Server implements Runnable {
                 }
                 requestLock.unlock();
 
+                ArrayList<Long> removes = new ArrayList<>();
                 for (HashMap.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
-                    if (message.getValue().getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
-                        System.out.println("The server did not process our message, did they receive it?");
-                        sendMessage(message.getValue());
+                    Message.Sent sent = message.getValue();
+                    if (!sent.isAcknowledged() && sent.getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
+                        System.out.println("The client did not acknowledge our message, did they receive it?");
+                        sendMessage(sent);
                     }
                 }
+                for (Long l : removes)
+                    sentMessages.remove(l);
             }
         }
 
         public void sendMessage(Message.Sent message){
-            this.sentMessages.put(message.getMessageID(), message);
+            if (message.getMessageID() != PacketTable.ACK)
+                this.sentMessages.put(message.getMessageID(), message);
             byte[] data = message.getData().toByteArray();
             if (data.length > PACKET_SIZE)
                 throw new RuntimeException("Unable to send packet as it exceeds maximum packet size!");
             DatagramPacket request = new DatagramPacket(data, data.length, address, port);
             try {
+                System.out.println("Sending message with ID " + message.getMessageID() + " to client: " + message.getClientID() + " of type " + message.getPacketID());
                 serverSocket.send(request);
             } catch (IOException e) {
                 e.printStackTrace();

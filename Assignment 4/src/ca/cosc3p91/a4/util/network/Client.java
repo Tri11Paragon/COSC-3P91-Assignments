@@ -40,6 +40,17 @@ public class Client implements Runnable {
 
                 view.printGameMenu();
             }
+            ArrayList<Long> removes = new ArrayList<>();
+            for (HashMap.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
+                Message.Sent sent = message.getValue();
+                if (!sent.isAcknowledged() && sent.getTimeSinceSent().get() > Server.MAX_PACKET_ACK_TIME_SECONDS) {
+                    System.out.println("The server did not acknowledge our message, did they receive it?");
+                    sendMessage(sent);
+                    removes.add(message.getKey());
+                }
+            }
+            for (Long l : removes)
+                sentMessages.remove(l);
         }
         clientSocket.close();
     }
@@ -57,14 +68,19 @@ public class Client implements Runnable {
                 long clientID = stream.readLong();
                 long messageID = stream.readLong();
 
+                System.out.println("Receiving message with ID " + messageID + " to client: " + clientID + " of type " + packetID);
+
                 switch (packetID) {
                     case PacketTable.ACK:
                         Message.Sent message = sentMessages.get(messageID);
                         if (message == null)
-                            throw new RuntimeException("Server message sync error!");
+                            throw new RuntimeException("Server acknowledged a message we never sent! (" + messageID + ")");
                         message.acknowledged();
                         sentMessages.remove(messageID);
-                        System.out.println("Message acknowledged " + messageID);
+                        System.out.println("Message acknowledged with ID: " + messageID);
+                        System.out.println("Messages left: " + sentMessages.size());
+                        for (HashMap.Entry<Long, Message.Sent> ms : sentMessages.entrySet())
+                            System.out.println("MessageID: " + ms.getKey());
                         break;
                     case PacketTable.DISCONNECT:
                         running = false;
@@ -78,10 +94,12 @@ public class Client implements Runnable {
     }
 
     private void sendMessage(Message.Sent message){
-        sentMessages.put(message.getMessageID(), message);
+        if (message.getMessageID() != PacketTable.ACK)
+            sentMessages.put(message.getMessageID(), message);
         byte[] data = message.getData().toByteArray();
         DatagramPacket sendPacket = new DatagramPacket(data, data.length, serverAddress, Server.SERVER_PORT);
         try {
+            System.out.println("Sending message with ID " + message.getMessageID() + " to server from: " + message.getClientID() + " of type " + message.getPacketID());
             clientSocket.send(sendPacket);
         } catch (Exception e) {
             e.printStackTrace();
