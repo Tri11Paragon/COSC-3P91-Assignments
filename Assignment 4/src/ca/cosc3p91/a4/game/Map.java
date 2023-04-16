@@ -56,7 +56,7 @@ public class Map implements Serializable {
 
     public boolean upgradeBuilding(int buildingIndex) {
 
-        if (buildingIndex >= contains.size()) return false;
+        if (buildingIndex >= contains.size() || buildingIndex < 0) return false;
 
         Building b = contains.get(buildingIndex);
 
@@ -93,7 +93,7 @@ public class Map implements Serializable {
 
     public boolean upgradeInhabitant(int inhabitantIndex) {
 
-        if (inhabitantIndex >= inhabitants.size()) return false;
+        if (inhabitantIndex >= inhabitants.size() || inhabitantIndex < 0) return false;
 
         Inhabitant i = inhabitants.get(inhabitantIndex);
 

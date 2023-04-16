@@ -1,11 +1,16 @@
 package ca.cosc3p91.a4.util.network;
 
 import ca.cosc3p91.a4.game.GameEngine;
+import ca.cosc3p91.a4.game.Map;
 
 import java.io.*;
 import java.net.*;
 import java.rmi.ServerException;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Server implements Runnable {
@@ -49,7 +54,7 @@ public class Server implements Runnable {
 
                 // the server must handle connection requests while the client's processing thread will handle all other messages
                 if (packetID == PacketTable.CONNECT){
-                    clients.put(++clientAssignmentID, new ConnectedClient(socket, clientID, messageID, receivePacket.getAddress(), receivePacket.getPort()));
+                    clients.put(++clientAssignmentID, new ConnectedClient(socket, mainEngine, clientID, messageID, receivePacket.getAddress(), receivePacket.getPort()));
                 } else if (packetID == PacketTable.DISCONNECT) {
                     if (client == null)
                         throw new ServerException("Client disconnected with invalid client id! (" + clientID + ")");
@@ -80,19 +85,32 @@ public class Server implements Runnable {
         private final int port;
         private final Queue<Message.Received> pendingRequests = new PriorityQueue<>();
         private final ReentrantLock requestLock = new ReentrantLock();
+        private final AtomicBoolean allowUpdate;
         private final HashMap<Long, Message.Sent> sentMessages = new HashMap<>();
         private final DatagramSocket serverSocket;
         private final long clientID;
         private volatile boolean running = true;
         private final Thread processingThread;
+        private final Thread gameEngineThread;
+        private final Map clientMap;
 
-        public ConnectedClient(DatagramSocket serverSocket, long clientID, long messageID, InetAddress address, int port){
+        public ConnectedClient(DatagramSocket serverSocket, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
             this.serverSocket = serverSocket;
             this.address = address;
             this.port = port;
             this.clientID = clientID;
+            this.clientMap = engine.generateInitialMap();
+            this.allowUpdate = new AtomicBoolean(true);
             processingThread = new Thread(this);
             processingThread.start();
+            gameEngineThread = new Thread(() -> {
+                while (true) {
+                    if (this.allowUpdate.get()) {
+                        engine.updateMap(clientMap);
+                    }
+                }
+            });
+            gameEngineThread.start();
 
             sendMessage(new Message.Sent(PacketTable.ACK, clientID, messageID));
         }
@@ -129,11 +147,13 @@ public class Server implements Runnable {
                 requestLock.lock();
                 if (!pendingRequests.isEmpty()) {
                     Message.Received request = pendingRequests.remove();
+                    allowUpdate.set(false);
                     processRequest(request);
+                    allowUpdate.set(true);
                 }
                 requestLock.unlock();
 
-                for (Map.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
+                for (HashMap.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
                     if (message.getValue().getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
                         System.out.println("The server did not process our message, did they receive it?");
                         sendMessage(message.getValue());

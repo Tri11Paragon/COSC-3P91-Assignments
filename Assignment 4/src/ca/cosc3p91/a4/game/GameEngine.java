@@ -13,14 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Random;
 
-public class GameEngine implements Runnable {
+public class GameEngine {
 
     public static final double GOLD_FACTOR = 5;
     public static final double IRON_FACTOR = 1;
     public static final double WOOD_FACTOR = 0.1;
-
-    private Player player;
-    boolean running = true;
 
     private float pillageFactor = 0.5f;
 
@@ -28,15 +25,12 @@ public class GameEngine implements Runnable {
 
     private final Random random = new Random(System.nanoTime());
 
-    public Map map;
     public GameDisplay view;
 
     public GameEngine() {
-        player = new Player();
-        map = generateInitialMap();
     }
 
-    public void attackVillage(Map map) {
+    public void attackVillage(Map attacking, Map defending) {
 //        int defenseiveCounter = 1;
 //        int inhabCounter = 0;
 //        for (Building b : map.contains)
@@ -53,31 +47,31 @@ public class GameEngine implements Runnable {
 //        this.map.getTownHall().addWood((int) (map.getTownHall().getCurrentWood() * pillageFactor));
 //        this.map.getTownHall().addIron((int) (map.getTownHall().getCurrentIron() * pillageFactor));
 //        this.map.getTownHall().addGold((int) (map.getTownHall().getCurrentGold() * pillageFactor));
-        ChallengeAdapter adapter = new ChallengeAdapter(this.map);
-        adapter.attack(map);
+        ChallengeAdapter adapter = new ChallengeAdapter(attacking);
+        adapter.attack(defending);
     }
 
-    private Map generateInitialMap(){
+    public Map generateInitialMap(){
         return new Map(new CasaDeNarino(1, VillageHallStages.villageStages[0]), 30);
     }
 
-    public Map generateMap() {
+    public Map generateMap(Map map) {
         Map initialMap = generateInitialMap();
 
         CasaDeNarino hall = initialMap.getTownHall();
 
         // generate a similar town hall
         int levelChange = random.nextInt(2) - 1;
-        int nextLevel = this.map.getTownHall().getLevel() + levelChange;
+        int nextLevel = map.getTownHall().getLevel() + levelChange;
         // only need to change if the new village level is higher than initial
         if (nextLevel > 0)
             hall.upgrade(VillageHallStages.villageStages[nextLevel]);
 
-        hall.addWood(this.map.getTownHall().getCurrentWood() + random.nextInt(500) - 150);
-        hall.addIron(this.map.getTownHall().getCurrentIron() + random.nextInt(500) - 150);
-        hall.addGold(this.map.getTownHall().getCurrentGold() + random.nextInt(500) - 150);
+        hall.addWood(map.getTownHall().getCurrentWood() + random.nextInt(500) - 150);
+        hall.addIron(map.getTownHall().getCurrentIron() + random.nextInt(500) - 150);
+        hall.addGold(map.getTownHall().getCurrentGold() + random.nextInt(500) - 150);
 
-        int buildingCount = this.map.contains.size();
+        int buildingCount = map.contains.size();
 
         int saulGoodMines = 0;
         int ironMines = 0;
@@ -86,7 +80,7 @@ public class GameEngine implements Runnable {
         int cannons = 0;
 
         // count buildings in our map
-        for (Building b : this.map.contains){
+        for (Building b : map.contains){
             if (b instanceof SaulGoodMine)
                 saulGoodMines++;
             else if (b instanceof IronMine)
@@ -145,6 +139,35 @@ public class GameEngine implements Runnable {
         return score;
     }
 
+    public void updateMap(Map map) {
+        for (int i = 0; i < map.contains.size(); i++) {
+            if ((map.contains.get(i) instanceof ResourceBuilding)) {
+                ((ResourceBuilding) map.contains.get(i)).update(map.getTownHall());
+            }
+        }
+    }
+
+    public boolean build (Map map, String buildingArg) {
+        BuildingFactory bfactory = new BuildingFactory();
+        Building type = bfactory.getBuilding(buildingArg);
+        return map.build(new Tile(), type);
+    }
+
+    public boolean train (Map map, String inhabitantArgs) {
+        InhabitantFactory ifactory = new InhabitantFactory();
+        Inhabitant type = ifactory.getInhabitant(inhabitantArgs);
+        return  map.train(type);
+    }
+
+    public boolean upgradeBuilding (Map map, int buildingIndex) {
+        return map.upgradeBuilding(buildingIndex);
+    }
+
+    public boolean upgradeInhabitant (Map map, int inhabitantIndex) {
+        return map.upgradeInhabitant(inhabitantIndex);
+    }
+
+    /*
     @Override
     public void run() {
         String in;
@@ -156,11 +179,6 @@ public class GameEngine implements Runnable {
         Map exploringMap = null;
         boolean deleteMyHeart = true;
         while (running) {
-            for (Building b : this.map.contains){
-                if ((b instanceof ResourceBuilding)) {
-                    ((ResourceBuilding) b).update(this.map.getTownHall());
-                }
-            }
             try {
                 if ((in = view.nextInput()) != null) {
                     String[] args = in.split(" ");
@@ -249,8 +267,7 @@ public class GameEngine implements Runnable {
             if (deleteMyHeart)
                 exploringMap = null;
         }
-        save("test.xml", this.map);
-    }
+    } */
 
     public void save(String file, Map map){
         try (XMLEncoder encoder = new XMLEncoder(new BufferedOutputStream(Files.newOutputStream(Paths.get(file))))) {
