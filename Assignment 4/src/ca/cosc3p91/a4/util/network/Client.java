@@ -110,7 +110,7 @@ public class Client implements Runnable {
     }
 
     private void sendMessage(Message.Sent message){
-        if (message.getMessageID() != PacketTable.ACK)
+        if (message.getPacketID() != PacketTable.ACK)
             sentMessages.put(message.getMessageID(), message);
         byte[] data = message.getData().toByteArray();
         DatagramPacket sendPacket = new DatagramPacket(data, data.length, serverAddress, Server.SERVER_PORT);

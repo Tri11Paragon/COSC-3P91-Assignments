@@ -176,7 +176,7 @@ public class Server implements Runnable {
         }
 
         public void sendMessage(Message.Sent message){
-            if (message.getMessageID() != PacketTable.ACK)
+            if (message.getPacketID() != PacketTable.ACK)
                 this.sentMessages.put(message.getMessageID(), message);
             byte[] data = message.getData().toByteArray();
             if (data.length > PACKET_SIZE)
