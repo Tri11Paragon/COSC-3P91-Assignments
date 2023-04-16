@@ -5,6 +5,8 @@ import ca.cosc3p91.a4.game.Map;
 
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 
 import java.util.ArrayList;
@@ -99,6 +101,7 @@ public class Server implements Runnable {
         private volatile boolean running = true;
         private final Thread processingThread;
         private final Thread gameEngineThread;
+        private final GameEngine usingEngine;
         private final Map clientMap;
 
         public ConnectedClient(DatagramSocket serverSocket, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
@@ -107,6 +110,7 @@ public class Server implements Runnable {
             this.port = port;
             this.clientID = clientID;
             this.clientMap = engine.generateInitialMap();
+            this.usingEngine = engine;
             this.allowUpdate = new AtomicBoolean(true);
             processingThread = new Thread(this);
             processingThread.start();
@@ -132,7 +136,7 @@ public class Server implements Runnable {
 
         private void processRequest(Message.Received request){
             try {
-                switch (request.getPacketID()){
+                switch (request.getPacketID()) {
                     case PacketTable.ACK:
                         Message.Sent message = sentMessages.get(request.getMessageID());
                         if (message == null)
@@ -143,6 +147,16 @@ public class Server implements Runnable {
                     case PacketTable.MESSAGE:
                         System.out.println(request.getReader().readUTF());
                         break;
+                    case PacketTable.BUILD:
+                        usingEngine.build(clientMap,new String(request.getData(), StandardCharsets.UTF_8));
+                        break;
+                    case PacketTable.TRAIN:
+                        usingEngine.train(clientMap,new String(request.getData(), StandardCharsets.UTF_8));
+                        break;
+                    case PacketTable.UPGRADE:
+                        usingEngine.upgradeBuilding(clientMap, ByteBuffer.wrap(request.getData()).getInt());
+                        break;
+
                 }
             } catch (Exception e) {
                 throw new RuntimeException(e);
