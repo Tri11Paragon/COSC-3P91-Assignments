@@ -9,10 +9,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -55,7 +52,7 @@ public class Server implements Runnable {
                 long clientID = stream.readLong();
                 long messageID = stream.readLong();
 
-                System.out.println("Receiving message with ID " + messageID + " to client: " + clientID + " of type " + packetID);
+                System.out.println("Receiving message with ID " + messageID + " from client: " + clientID + " of type " + packetID);
 
                 ConnectedClient client = clients.get(clientID);
 
@@ -67,7 +64,7 @@ public class Server implements Runnable {
                     continue;
                 }
                 if (client == null)
-                    throw new ServerException("Client disconnected with invalid client id! (" + clientID + ")");
+                    throw new ServerException("Client sent message invalid client id! (" + clientID + ")");
                 if (packetID == PacketTable.DISCONNECT) {
                     client.halt();
                     clients.remove(clientID);
@@ -95,7 +92,7 @@ public class Server implements Runnable {
         private final Queue<Message.Received> pendingRequests = new PriorityQueue<>();
         private final ReentrantLock requestLock = new ReentrantLock();
         private final AtomicBoolean allowUpdate;
-        private final HashMap<Long, Message.Sent> sentMessages = new HashMap<>();
+        private final java.util.Map<Long, Message.Sent> sentMessages = Collections.synchronizedMap(new HashMap<>());
         private final DatagramSocket serverSocket;
         private final long clientID;
         private volatile boolean running = true;
@@ -148,16 +145,20 @@ public class Server implements Runnable {
                         System.out.println(request.getReader().readUTF());
                         break;
                     case PacketTable.BUILD:
-                        usingEngine.build(clientMap,new String(request.getData(), StandardCharsets.UTF_8));
+                        if (usingEngine.build(clientMap, request.getReader().readUTF())){
+                            System.out.println("Client " + clientID + " has built something!");
+                        } else {
+                            System.out.println("Client " + clientID + " failed to build!");
+                        }
                         break;
                     case PacketTable.TRAIN:
-                        usingEngine.train(clientMap,new String(request.getData(), StandardCharsets.UTF_8));
+                        usingEngine.train(clientMap, request.getReader().readUTF());
                         break;
                     case PacketTable.UPGRADE:
-                        usingEngine.upgradeBuilding(clientMap, ByteBuffer.wrap(request.getData()).getInt());
+                        usingEngine.upgradeBuilding(clientMap, Integer.parseInt(request.getReader().readUTF()));
                         break;
-
                 }
+                sendMessage(new Message.Sent(PacketTable.ACK, clientID, request.getMessageID()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

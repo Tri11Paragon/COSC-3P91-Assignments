@@ -150,6 +150,8 @@ public class GameEngine {
     public synchronized boolean build (Map map, String buildingArg) {
         BuildingFactory bfactory = new BuildingFactory();
         Building type = bfactory.getBuilding(buildingArg);
+        if (type == null)
+            return false;
         return map.build(new Tile(), type);
     }
 

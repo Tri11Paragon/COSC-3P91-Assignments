@@ -23,6 +23,6 @@ public class PacketTable {
     // messageHeader, upgrade
     public static final byte UPGRADE = 0x7;
     // messageHeader, serial packets with map info
-    public static final byte USER_MAP_DATA = 0x8;
+    public static final byte PRINT_MAP_DATA = 0x8;
 
 }

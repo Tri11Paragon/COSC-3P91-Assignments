@@ -9,17 +9,21 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Client implements Runnable {
     private GameDisplay view = new GameDisplay();
 
     private DatagramSocket clientSocket;
-    private boolean running = true;
+    private volatile boolean running = true;
     private Thread receiveThread;
-    private final HashMap<Long, Message.Sent> sentMessages = new HashMap<>();
+    private final Map<Long, Message.Sent> sentMessages = Collections.synchronizedMap(new HashMap<>());
     private int lastMessageID = 0;
     private final InetAddress serverAddress;
+
+    private long ourClientID = 0;
 
     public Client(String address) throws IOException {
         serverAddress = InetAddress.getByName(address);
@@ -27,17 +31,28 @@ public class Client implements Runnable {
         receiveThread = new Thread(this);
         receiveThread.start();
 
-        sendMessage(new Message.Sent(PacketTable.CONNECT, 0, ++lastMessageID));
+        sendMessage(new Message.Sent(PacketTable.CONNECT, ourClientID, ++lastMessageID));
 
         while (running) {
             String prompt;
             if ((prompt = view.nextInput()) != null) {
                 if (prompt.trim().isEmpty())
                     continue;
-                if (prompt.charAt(0) == '6')
+                if (prompt.charAt(0) == '6') {
+                    running = false;
                     break;
+                }
+                view.printGameMenu();
+                String[] args = prompt.split(" ");
+                char c = prompt.charAt(0);
+                if (c > '0' && c < '4') {
+                    if (args.length < 2) {
+                        System.err.println("Args must include type!");
+                        continue;
+                    }
+                }
                 byte messageType;
-                switch (prompt.charAt(0)) {
+                switch (c) {
                     case '1':
                         messageType = PacketTable.BUILD;
                         break;
@@ -47,15 +62,16 @@ public class Client implements Runnable {
                     case '3':
                         messageType = PacketTable.UPGRADE;
                         break;
+                    case '5':
+                        messageType = PacketTable.PRINT_MAP_DATA;
+                        break;
                     default:
                         System.err.println("> Invalid command input!");
                         return;
                 }
-                Message.Sent buildMessage = new Message.Sent(messageType,0,++lastMessageID);
-                buildMessage.getData().write(prompt.substring(1).getBytes());
+                Message.Sent buildMessage = new Message.Sent(messageType,ourClientID,++lastMessageID);
+                buildMessage.getWriter().writeUTF(prompt.substring(1));
                 sendMessage(buildMessage);
-
-                view.printGameMenu();
             }
             ArrayList<Long> removes = new ArrayList<>();
             for (HashMap.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
@@ -89,6 +105,8 @@ public class Client implements Runnable {
 
                 switch (packetID) {
                     case PacketTable.ACK:
+                        if (ourClientID == 0)
+                            ourClientID = clientID;
                         Message.Sent message = sentMessages.get(messageID);
                         if (message == null)
                             throw new RuntimeException("Server acknowledged a message we never sent! (" + messageID + ")");
@@ -99,11 +117,16 @@ public class Client implements Runnable {
                         for (HashMap.Entry<Long, Message.Sent> ms : sentMessages.entrySet())
                             System.out.println("MessageID: " + ms.getKey());
                         break;
+                    case PacketTable.MESSAGE:
+                        System.out.println(stream.readUTF());
+                        break;
                     case PacketTable.DISCONNECT:
                         running = false;
                         break;
                 }
-
+                if (packetID != PacketTable.ACK && packetID != PacketTable.DISCONNECT){
+                    sendMessage(new Message.Sent(PacketTable.ACK, ourClientID, messageID));
+                }
             } catch (Exception e){
                 e.printStackTrace();
             }
