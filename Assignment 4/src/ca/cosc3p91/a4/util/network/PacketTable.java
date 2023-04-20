@@ -28,4 +28,7 @@ public class PacketTable {
     public static final byte BEGIN_MAP_DATA = 0x9; // server -> client
     // messageHeader, line number (int), UTF8 String (the line)
     public static final byte MAP_LINE_DATA = 0xA; // server -> client
+    public static final byte EXPLORE = 0xB;
+    public static final byte ATTACK = 0xC;
+    public static final byte GENERATE = 0xD;
 }

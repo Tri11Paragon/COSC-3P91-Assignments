@@ -86,13 +86,14 @@ public class GameDisplay {
     }
 
     public void printGameMenu() {
-        System.out.println("\n~ Player Options:\n" +
+        System.out.println("\n\033[36m~ Player Options:\n" +
                 "1. Build {command: '1 <building name>'}\n" +
                 "2. Train inhabitants {command: '2 <unit name>'}\n"+
                 "3. Upgrade {command: '3 i<index>'} / {command: '3 b<index>'}\n"+
-                "4. Explore\n"+
+                "4. Explore Player Villages\n"+
                 "5. Print Village Stats\n"+
                 "6. Quit\n" +
-                "7. Attack last explored\n");
+                "7. Attack last explored/generated\n" +
+                "8. Generate Village\033[0m\n");
     }
 }

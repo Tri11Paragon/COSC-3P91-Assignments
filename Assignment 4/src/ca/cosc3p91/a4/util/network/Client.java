@@ -36,6 +36,8 @@ public class Client implements Runnable {
 
         sendMessage(new Message.Sent(PacketTable.CONNECT, ourClientID, ++lastMessageID));
 
+        view.printGameMenu();
+
         while (running) {
             String prompt;
             if ((prompt = view.nextInput()) != null) {
@@ -65,8 +67,17 @@ public class Client implements Runnable {
                     case '3':
                         messageType = PacketTable.UPGRADE;
                         break;
+                    case '4':
+                        messageType = PacketTable.EXPLORE;
+                        break;
                     case '5':
                         messageType = PacketTable.PRINT_MAP_DATA;
+                        break;
+                    case '7':
+                        messageType = PacketTable.ATTACK;
+                        break;
+                    case '8':
+                        messageType = PacketTable.GENERATE;
                         break;
                     default:
                         System.err.println("> Invalid command input!");
@@ -121,7 +132,7 @@ public class Client implements Runnable {
                             System.out.println("MessageID: " + ms.getKey());
                         break;
                     case PacketTable.MESSAGE:
-                        System.out.println(stream.readUTF());
+                        System.out.println("\033[93m" + stream.readUTF() + "\033[0m");
                         break;
                     case PacketTable.BEGIN_MAP_DATA:
                         expectedLines = stream.readInt();
@@ -134,7 +145,7 @@ public class Client implements Runnable {
                         currentLines++;
                         if (currentLines >= expectedLines) {
                             for (String line : lineBuffer){
-                                System.out.println(line);
+                                System.out.println("\033[92m" + line + "\033[0m");
                             }
                         }
                         break;

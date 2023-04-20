@@ -54,17 +54,20 @@ public class Map implements Serializable {
             return false;
     }
 
-    public boolean upgradeBuilding(int buildingIndex) {
+    public boolean upgradeBuilding(int buildingIndex) throws GameEngine.UpgradingErrorException {
 
-        if (buildingIndex >= contains.size() || buildingIndex < 0) return false;
+        if (buildingIndex >= contains.size() || buildingIndex < 0)
+            return false;
 
         Building b = contains.get(buildingIndex);
 
         int currentLevel = b.getLevel();
         CasaDeNarino hall = getTownHall();
 
-        if (currentLevel >= 2) return false;
-        else if (b instanceof Farm) return true;
+        if (currentLevel >= 2)
+            return false;
+        else if (b instanceof Farm)
+            return true;
 
         int goldCost = b.getUpgradeStage().getCost(SaulGoodMine.resource);
         int ironCost = b.getUpgradeStage().getCost(IronMine.resource);
@@ -86,7 +89,8 @@ public class Map implements Serializable {
             } else {
                 b.upgrade(VillageHallStages.villageStages[currentLevel + 1]);
             }
-        } else return false;
+        } else
+            return false;
 
         return true;
     }

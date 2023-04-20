@@ -19,7 +19,7 @@ public class GameEngine {
     public static final double IRON_FACTOR = 1;
     public static final double WOOD_FACTOR = 0.1;
 
-    private final float pillageFactor = 0.5f;
+    private float pillageFactor = 0.5f;
 
     private int currentTime;
 
@@ -31,22 +31,22 @@ public class GameEngine {
     }
 
     public void attackVillage(Map attacking, Map defending) {
-//        int defenseiveCounter = 1;
-//        int inhabCounter = 0;
-//        for (Building b : map.contains)
-//            if (b instanceof DefenseBuilding)
-//                defenseiveCounter++;
-//        for (Inhabitant i : map.inhabitants)
-//            if (i instanceof Infantry)
-//                inhabCounter++;
-//        pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
-//        if (pillageFactor < 0)
-//            pillageFactor = 0;
-//        if (pillageFactor > 1)
-//            pillageFactor = 1;
-//        this.map.getTownHall().addWood((int) (map.getTownHall().getCurrentWood() * pillageFactor));
-//        this.map.getTownHall().addIron((int) (map.getTownHall().getCurrentIron() * pillageFactor));
-//        this.map.getTownHall().addGold((int) (map.getTownHall().getCurrentGold() * pillageFactor));
+        int defenseiveCounter = 1;
+        int inhabCounter = 0;
+        for (Building b : defending.contains)
+            if (b instanceof DefenseBuilding)
+                defenseiveCounter++;
+        for (Inhabitant i : defending.inhabitants)
+            if (i instanceof Infantry)
+                inhabCounter++;
+        pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
+        if (pillageFactor < 0)
+            pillageFactor = 0;
+        if (pillageFactor > 1)
+            pillageFactor = 1;
+        attacking.getTownHall().addWood((int) (defending.getTownHall().getCurrentWood() * pillageFactor));
+        attacking.getTownHall().addIron((int) (defending.getTownHall().getCurrentIron() * pillageFactor));
+        attacking.getTownHall().addGold((int) (defending.getTownHall().getCurrentGold() * pillageFactor));
         ChallengeAdapter adapter = new ChallengeAdapter(attacking);
         adapter.attack(defending);
     }
@@ -155,17 +155,19 @@ public class GameEngine {
         return map.build(new Tile(), type);
     }
 
-    public boolean train (Map map, String inhabitantArgs) {
+    public boolean train (Map map, String inhabitantArgs) throws TrainingErrorException {
         InhabitantFactory ifactory = new InhabitantFactory();
         Inhabitant type = ifactory.getInhabitant(inhabitantArgs);
+        if (type == null)
+            throw new TrainingErrorException("Invalid training type!");
         return  map.train(type);
     }
 
-    public synchronized boolean upgradeBuilding (Map map, int buildingIndex) {
+    public synchronized boolean upgradeBuilding (Map map, int buildingIndex) throws UpgradingErrorException {
         return map.upgradeBuilding(buildingIndex);
     }
 
-    public boolean upgradeInhabitant (Map map, int inhabitantIndex) {
+    public synchronized boolean upgradeInhabitant (Map map, int inhabitantIndex) {
         return map.upgradeInhabitant(inhabitantIndex);
     }
 
@@ -283,6 +285,18 @@ public class GameEngine {
 
     public static class BuildingErrorException extends Exception {
         public BuildingErrorException(String message){
+            super(message);
+        }
+    }
+
+    public static class TrainingErrorException extends Exception {
+        public TrainingErrorException(String message){
+            super(message);
+        }
+    }
+
+    public static class UpgradingErrorException extends Exception {
+        public UpgradingErrorException(String message){
             super(message);
         }
     }

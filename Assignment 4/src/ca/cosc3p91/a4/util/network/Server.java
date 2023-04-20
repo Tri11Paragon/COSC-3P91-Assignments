@@ -27,7 +27,7 @@ public class Server implements Runnable {
     private final Thread ioThread;
 //    private static volatile long lastSentMessageID = 0;
 
-    private GameEngine mainEngine;
+    private final GameEngine mainEngine;
 
     private volatile boolean running = true;
 
@@ -62,7 +62,7 @@ public class Server implements Runnable {
                 if (packetID == PacketTable.CONNECT){
                     long cid = ++clientAssignmentID;
                     System.out.println("A client has connected, his clientID is " + cid);
-                    clients.put(cid, new ConnectedClient(socket, mainEngine, cid, messageID, receivePacket.getAddress(), receivePacket.getPort()));
+                    clients.put(cid, new ConnectedClient(this, mainEngine, cid, messageID, receivePacket.getAddress(), receivePacket.getPort()));
                     continue;
                 }
                 if (client == null)
@@ -95,7 +95,7 @@ public class Server implements Runnable {
         private final ReentrantLock requestLock = new ReentrantLock();
         private final AtomicBoolean allowUpdate;
         private final java.util.Map<Long, Message.Sent> sentMessages = Collections.synchronizedMap(new HashMap<>());
-        private final DatagramSocket serverSocket;
+        private final Server server;
         private final long clientID;
         private volatile boolean running = true;
         private final Thread processingThread;
@@ -103,9 +103,10 @@ public class Server implements Runnable {
         private final GameEngine usingEngine;
         private long lastSentMessageID = 0;
         private final Map clientMap;
+        private Map exploringMap;
 
-        public ConnectedClient(DatagramSocket serverSocket, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
-            this.serverSocket = serverSocket;
+        public ConnectedClient(Server server, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
+            this.server = server;
             this.address = address;
             this.port = port;
             this.clientID = clientID;
@@ -162,13 +163,62 @@ public class Server implements Runnable {
                         }
                         break;
                     case PacketTable.TRAIN:
-                        usingEngine.train(clientMap, request.getReader().readUTF());
+                        try {
+                            String type = request.getReader().readUTF().trim();
+                            if (usingEngine.train(clientMap, type))
+                                sendAndLogLn("Client " + clientID + " has successfully trained " + type + "!");
+                            else
+                                sendAndLogLn("Client " + clientID + " has insufficient funds to train " + type + "!");
+                        } catch (GameEngine.TrainingErrorException e){
+                            sendAndLogLn(e.getMessage());
+                        }
                         break;
                     case PacketTable.UPGRADE:
-                        usingEngine.upgradeBuilding(clientMap, Integer.parseInt(request.getReader().readUTF()));
+                        try {
+                            String type = request.getReader().readUTF();
+                            int val = Integer.parseInt(
+                                    type.replace("b", "")
+                                            .replace(" ", "")
+                                            .replace("i", "")
+                                            .trim());
+                            boolean status = false;
+                            if (type.contains("b"))
+                                status = usingEngine.upgradeBuilding(clientMap, val);
+                            else
+                                status = usingEngine.upgradeInhabitant(clientMap, val);
+                            if (status)
+                                sendAndLogLn("Client " + clientID + " has successfully upgraded " + type + "!");
+                            else
+                                sendAndLogLn("Client " + clientID + " was unable to upgrade " + type + "!");
+                        } catch (GameEngine.UpgradingErrorException e){
+                            sendAndLogLn(e.getMessage());
+                        }
                         break;
                     case PacketTable.PRINT_MAP_DATA:
                         sendMapData(usingEngine.view.getVillageStateTable(clientMap, "Home Village"));
+                        break;
+                    case PacketTable.EXPLORE:
+                        Random rand = new Random();
+                        int clients = server.clients.size();
+                        int pos = rand.nextInt(clients);
+                        while (pos == clientID)
+                            pos = rand.nextInt(clients);
+                        Iterator<java.util.Map.Entry<Long, ConnectedClient>> entries = server.clients.entrySet().iterator();
+                        for (int i = 0; i < pos; i++)
+                            entries.next();
+                        exploringMap = entries.next().getValue().clientMap;
+                        sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Other Village"));
+                        break;
+                    case PacketTable.GENERATE:
+                        exploringMap = usingEngine.generateMap(clientMap);
+                        sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Other Village"));
+                        break;
+                    case PacketTable.ATTACK:
+                        if (exploringMap != null)
+                            usingEngine.attackVillage(clientMap, exploringMap);
+                        else
+                            sendAndLogLn("Error: Explored map is null. Did you explored/generated last command?");
+                        exploringMap = null;
                         break;
                 }
                 if (request.getPacketID() != PacketTable.ACK)
@@ -264,7 +314,7 @@ public class Server implements Runnable {
             DatagramPacket request = new DatagramPacket(data, data.length, address, port);
             try {
                 System.out.println("Sending message with ID " + message.getMessageID() + " to client: " + message.getClientID() + " of type " + message.getPacketID());
-                serverSocket.send(request);
+                server.socket.send(request);
             } catch (IOException e) {
                 e.printStackTrace();
             }
