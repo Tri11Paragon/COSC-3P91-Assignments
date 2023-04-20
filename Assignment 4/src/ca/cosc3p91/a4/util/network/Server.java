@@ -205,12 +205,20 @@ public class Server implements Runnable {
                             break;
                         }
                         int pos = rand.nextInt(clients);
-                        while (pos == clientID)
+                        long findingClientID = clientID;
+                        ConnectedClient foundClient = null;
+                        int searchCount = 0;
+                        while (findingClientID == clientID) {
                             pos = rand.nextInt(clients);
-                        Iterator<java.util.Map.Entry<Long, ConnectedClient>> entries = server.clients.entrySet().iterator();
-                        for (int i = 0; i < pos; i++)
-                            entries.next();
-                        exploringMap = entries.next().getValue().clientMap;
+                            Iterator<java.util.Map.Entry<Long, ConnectedClient>> entries = server.clients.entrySet().iterator();
+                            for (int i = 0; i < pos; i++)
+                                entries.next();
+                            foundClient = entries.next().getValue();
+                            findingClientID = foundClient.clientID;
+                            if(searchCount++ > 50)
+                                break;
+                        }
+                        exploringMap = foundClient.clientMap;
                         sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Other Village"));
                         break;
                     case PacketTable.GENERATE:
