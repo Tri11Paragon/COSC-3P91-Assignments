@@ -22,7 +22,10 @@ public class PacketTable {
     public static final byte TRAIN = 0x6;
     // messageHeader, upgrade
     public static final byte UPGRADE = 0x7;
-    // messageHeader, serial packets with map info
-    public static final byte PRINT_MAP_DATA = 0x8;
-
+    // messageHeader
+    public static final byte PRINT_MAP_DATA = 0x8; // client -> server only!
+    // messageHeader, line count
+    public static final byte BEGIN_MAP_DATA = 0x9; // server -> client
+    // messageHeader, line number (int), UTF8 String (the line)
+    public static final byte MAP_LINE_DATA = 0xA; // server -> client
 }

@@ -22,6 +22,9 @@ public class Client implements Runnable {
     private final Map<Long, Message.Sent> sentMessages = Collections.synchronizedMap(new HashMap<>());
     private int lastMessageID = 0;
     private final InetAddress serverAddress;
+    private String[] lineBuffer = new String[0];
+    private int expectedLines = 0;
+    private int currentLines = 0;
 
     private long ourClientID = 0;
 
@@ -120,7 +123,23 @@ public class Client implements Runnable {
                     case PacketTable.MESSAGE:
                         System.out.println(stream.readUTF());
                         break;
+                    case PacketTable.BEGIN_MAP_DATA:
+                        expectedLines = stream.readInt();
+                        currentLines = 0;
+                        lineBuffer = new String[expectedLines];
+                        break;
+                    case PacketTable.MAP_LINE_DATA:
+                        int lineNumber = stream.readInt();
+                        lineBuffer[lineNumber] = stream.readUTF();
+                        currentLines++;
+                        if (currentLines >= expectedLines) {
+                            for (String line : lineBuffer){
+                                System.out.println(line);
+                            }
+                        }
+                        break;
                     case PacketTable.DISCONNECT:
+                        System.out.println("Disconnecting!");
                         running = false;
                         break;
                 }

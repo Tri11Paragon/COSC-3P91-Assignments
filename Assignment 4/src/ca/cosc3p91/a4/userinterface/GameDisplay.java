@@ -53,7 +53,7 @@ public class GameDisplay {
                 Integer.toString(map.getTownHall().getGoldCapacity()),
                 Integer.toString(map.getTownHall().getCurrentGold())));
 
-        Print.print(resourcesPrinter.createTable(true, false, true));
+        ArrayList<String> total = new ArrayList<>(resourcesPrinter.createTable(true, false, true));
 
         Print buildingPrinter = new Print("Village Buildings", 2, resourcesPrinter.getWidth());
         buildingPrinter.addColumn(new Print.Column("Name"));
@@ -65,7 +65,7 @@ public class GameDisplay {
                     Integer.toString(b.getLevel() + 1),
                     Integer.toString(b.getHealth())));
 
-        Print.print(buildingPrinter.createTable(true, false, true));
+        total.addAll(buildingPrinter.createTable(true, false, true));
 
         Print inhabs = new Print("Village Inhabitants", 2, buildingPrinter.getWidth());
         inhabs.addColumn(new Print.Column("Name"));
@@ -74,7 +74,11 @@ public class GameDisplay {
         for (Inhabitant i : map.inhabitants)
             inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel() + 1)));
 
-        return inhabs.createTable(true, true, true);
+        total.addAll(inhabs.createTable(true, true, true));
+        System.out.println(buildingPrinter.getWidth());
+        System.out.println(resourcesPrinter.getWidth());
+        System.out.println(inhabs.getWidth());
+        return total;
     }
 
     public void printVillageState(Map map, String displayName) {

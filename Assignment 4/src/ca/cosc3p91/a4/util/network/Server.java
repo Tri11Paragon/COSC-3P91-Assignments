@@ -143,6 +143,9 @@ public class Server implements Runnable {
                             throw new RuntimeException("A message was acknowledged but does not exist!");
                         message.acknowledged();
                         sentMessages.remove(request.getMessageID());
+                        synchronized (sentMessages) {
+                            sentMessages.notifyAll();
+                        }
                         break;
                     case PacketTable.MESSAGE:
                         System.out.println(request.getReader().readUTF());
@@ -165,7 +168,7 @@ public class Server implements Runnable {
                         usingEngine.upgradeBuilding(clientMap, Integer.parseInt(request.getReader().readUTF()));
                         break;
                     case PacketTable.PRINT_MAP_DATA:
-                        usingEngine.view.getVillageStateTable(clientMap, "Home Village").forEach(this::sendMessageLn);
+                        sendMapData(usingEngine.view.getVillageStateTable(clientMap, "Home Village"));
                         break;
                 }
                 if (request.getPacketID() != PacketTable.ACK)
@@ -187,33 +190,68 @@ public class Server implements Runnable {
                 }
                 requestLock.unlock();
 
-                ArrayList<Long> removes = new ArrayList<>();
-                for (HashMap.Entry<Long, Message.Sent> message : sentMessages.entrySet()){
-                    Message.Sent sent = message.getValue();
-                    if (!sent.isAcknowledged() && sent.getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
-                        System.out.println("The client did not acknowledge our message, did they receive it?");
-                        sendMessage(sent);
-                        removes.add(message.getKey());
+                // sentEntries needn't be in the synchronized block
+                Set<HashMap.Entry<Long, Message.Sent>> sentEntries = sentMessages.entrySet();
+                synchronized (sentMessages) {
+                    ArrayList<Long> removes = new ArrayList<>();
+                    for (HashMap.Entry<Long, Message.Sent> message : sentEntries) {
+                        Message.Sent sent = message.getValue();
+                        if (!sent.isAcknowledged() && sent.getTimeSinceSent().get() > MAX_PACKET_ACK_TIME_SECONDS) {
+                            System.out.println("The client did not acknowledge our message, did they receive it?");
+                            sendMessage(sent);
+                            removes.add(message.getKey());
+                        }
                     }
+                    for (Long l : removes)
+                        sentMessages.remove(l);
                 }
-                for (Long l : removes)
-                    sentMessages.remove(l);
             }
         }
 
-        private void sendMessageLn(String str) {
+        private void sendMapData(ArrayList<String> lines) {
+            final long messageID = ++lastSentMessageID;
+            Message.Sent beginMapInfoMessage = new Message.Sent(PacketTable.BEGIN_MAP_DATA, clientID, messageID);
+            try {
+                beginMapInfoMessage.getWriter().writeInt(lines.size());
+                sendMessage(beginMapInfoMessage);
+            } catch (IOException e) {
+                sendAndLogLn("Unable to send map data: " + e.getMessage());
+                return;
+            }
+            new Thread(() -> {
+                while (sentMessages.containsKey(messageID)){
+                    try {
+                        synchronized (sentMessages) {
+                            sentMessages.wait();
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                // once we know that the client is waiting on our map data, we can send it in any order.
+                for (int i = 0; i < lines.size(); i++){
+                    Message.Sent line = new Message.Sent(PacketTable.MAP_LINE_DATA, clientID, ++lastSentMessageID);
+                    try {
+                        // but we need the line index!
+                        line.getWriter().writeInt(i);
+                        line.getWriter().writeUTF(lines.get(i));
+                    } catch (IOException e){
+                        e.printStackTrace();
+                    }
+                    sendMessage(line);
+                }
+            }).start();
+        }
+
+        private void sendAndLogLn(String str){
             Message.Sent mess = new Message.Sent(PacketTable.MESSAGE, clientID, ++lastSentMessageID);
             try {
                 mess.getWriter().writeUTF(str + "\n");
                 sendMessage(mess);
+                System.out.println(str);
             } catch (IOException e){
                 e.printStackTrace();
             }
-        }
-
-        private void sendAndLogLn(String str){
-            sendMessageLn(str);
-            System.out.println(str);
         }
 
 
