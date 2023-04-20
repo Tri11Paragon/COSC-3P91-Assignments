@@ -2,15 +2,14 @@ package ca.cosc3p91.a4.util.network;
 
 import ca.cosc3p91.a4.game.GameEngine;
 import ca.cosc3p91.a4.game.Map;
+import ca.cosc3p91.a4.gameobjects.Infantry;
+import ca.cosc3p91.a4.gameobjects.Inhabitant;
 
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 
 import java.util.*;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,7 +58,7 @@ public class Server implements Runnable {
                 ConnectedClient client = clients.get(clientID);
 
                 // the server must handle connection requests while the client's processing thread will handle all other messages
-                if (packetID == PacketTable.CONNECT){
+                if (packetID == PacketIDs.CONNECT){
                     long cid = ++clientAssignmentID;
                     System.out.println("A client has connected, his clientID is " + cid);
                     clients.put(cid, new ConnectedClient(this, mainEngine, cid, messageID, receivePacket.getAddress(), receivePacket.getPort()));
@@ -67,7 +66,7 @@ public class Server implements Runnable {
                 }
                 if (client == null)
                     throw new ServerException("Client sent message invalid client id! (" + clientID + ")");
-                if (packetID == PacketTable.DISCONNECT) {
+                if (packetID == PacketIDs.DISCONNECT) {
                     client.halt();
                     clients.remove(clientID);
                     continue;
@@ -124,7 +123,7 @@ public class Server implements Runnable {
             });
             gameEngineThread.start();
 
-            sendMessage(new Message.Sent(PacketTable.ACK, clientID, messageID));
+            sendMessage(new Message.Sent(PacketIDs.ACK, clientID, messageID));
         }
 
         public void handleRequest(Message.Received request){
@@ -138,7 +137,7 @@ public class Server implements Runnable {
         private void processRequest(Message.Received request){
             try {
                 switch (request.getPacketID()) {
-                    case PacketTable.ACK:
+                    case PacketIDs.ACK:
                         Message.Sent message = sentMessages.get(request.getMessageID());
                         if (message == null)
                             throw new RuntimeException("A message was acknowledged but does not exist!");
@@ -148,10 +147,10 @@ public class Server implements Runnable {
                             sentMessages.notifyAll();
                         }
                         break;
-                    case PacketTable.MESSAGE:
+                    case PacketIDs.MESSAGE:
                         System.out.println(request.getReader().readUTF());
                         break;
-                    case PacketTable.BUILD:
+                    case PacketIDs.BUILD:
                         try {
                             String type = request.getReader().readUTF().trim();
                             if (usingEngine.build(clientMap, type))
@@ -162,7 +161,7 @@ public class Server implements Runnable {
                             sendAndLogLn(e.getMessage());
                         }
                         break;
-                    case PacketTable.TRAIN:
+                    case PacketIDs.TRAIN:
                         try {
                             String type = request.getReader().readUTF().trim();
                             if (usingEngine.train(clientMap, type))
@@ -173,7 +172,7 @@ public class Server implements Runnable {
                             sendAndLogLn(e.getMessage());
                         }
                         break;
-                    case PacketTable.UPGRADE:
+                    case PacketIDs.UPGRADE:
                         try {
                             String type = request.getReader().readUTF();
                             int val = Integer.parseInt(
@@ -194,10 +193,10 @@ public class Server implements Runnable {
                             sendAndLogLn(e.getMessage());
                         }
                         break;
-                    case PacketTable.PRINT_MAP_DATA:
+                    case PacketIDs.PRINT_MAP_DATA:
                         sendMapData(usingEngine.view.getVillageStateTable(clientMap, "Home Village"));
                         break;
-                    case PacketTable.EXPLORE:
+                    case PacketIDs.EXPLORE:
                         Random rand = new Random();
                         int clients = server.clients.size();
                         if (clients <= 1) {
@@ -221,21 +220,38 @@ public class Server implements Runnable {
                         exploringMap = foundClient.clientMap;
                         sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Other Village"));
                         break;
-                    case PacketTable.GENERATE:
+                    case PacketIDs.GENERATE:
                         exploringMap = usingEngine.generateMap(clientMap);
                         sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Generated Village"));
                         break;
-                    case PacketTable.ATTACK:
+                    case PacketIDs.ATTACK:
                         if (exploringMap != null) {
-                            if (!usingEngine.attackVillage(clientMap, exploringMap, this))
+                            if (!usingEngine.attackVillage(clientMap, exploringMap, false,this))
                                 sendAndLogLn("Failed to attack!");
                         } else
                             sendAndLogLn("Error: Explored map is null. Did you explored/generated last command?");
                         exploringMap = null;
                         break;
+                    case PacketIDs.TEST_ARMY:
+                    case PacketIDs.TEST_VILLAGE:
+                        // said it had to be similar, not that it couldn't be the same!
+                        Map m = usingEngine.generateInitialMap();
+                        clientMap.inhabitants.stream().filter(i -> i instanceof Infantry).forEach(i -> {
+                            m.inhabitants.add(i);
+                        });
+                        Random iamtired = new Random(69420);
+                        int goodnight = iamtired.nextInt(69420 * 2 + 1) - 69420;
+                        String asillynightmare = request.getPacketID() == PacketIDs.TEST_VILLAGE
+                                ? ("Your score was: " + String.valueOf(goodnight) + (goodnight <= 0 ? "! (you suck)" : "!"))
+                                : "";
+                        if (usingEngine.attackVillage(m, clientMap, true, this))
+                            sendAndLogLn("Your village failed to defend! " + asillynightmare);
+                        else
+                            sendAndLogLn("Your village successfully defended itself from a similarly sized army! " + asillynightmare);
+                        break;
                 }
-                if (request.getPacketID() != PacketTable.ACK)
-                    sendMessage(new Message.Sent(PacketTable.ACK, clientID, request.getMessageID()));
+                if (request.getPacketID() != PacketIDs.ACK)
+                    sendMessage(new Message.Sent(PacketIDs.ACK, clientID, request.getMessageID()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -273,7 +289,7 @@ public class Server implements Runnable {
 
         private void sendMapData(ArrayList<String> lines) {
             final long messageID = ++lastSentMessageID;
-            Message.Sent beginMapInfoMessage = new Message.Sent(PacketTable.BEGIN_MAP_DATA, clientID, messageID);
+            Message.Sent beginMapInfoMessage = new Message.Sent(PacketIDs.BEGIN_MAP_DATA, clientID, messageID);
             try {
                 beginMapInfoMessage.getWriter().writeInt(lines.size());
                 sendMessage(beginMapInfoMessage);
@@ -293,7 +309,7 @@ public class Server implements Runnable {
                 }
                 // once we know that the client is waiting on our map data, we can send it in any order.
                 for (int i = 0; i < lines.size(); i++){
-                    Message.Sent line = new Message.Sent(PacketTable.MAP_LINE_DATA, clientID, ++lastSentMessageID);
+                    Message.Sent line = new Message.Sent(PacketIDs.MAP_LINE_DATA, clientID, ++lastSentMessageID);
                     try {
                         // but we need the line index!
                         line.getWriter().writeInt(i);
@@ -307,7 +323,7 @@ public class Server implements Runnable {
         }
 
         public void sendAndLogLn(String str){
-            Message.Sent mess = new Message.Sent(PacketTable.MESSAGE, clientID, ++lastSentMessageID);
+            Message.Sent mess = new Message.Sent(PacketIDs.MESSAGE, clientID, ++lastSentMessageID);
             try {
                 mess.getWriter().writeUTF(str + "\n");
                 sendMessage(mess);
@@ -319,7 +335,7 @@ public class Server implements Runnable {
 
 
         public void sendMessage(Message.Sent message){
-            if (message.getPacketID() != PacketTable.ACK)
+            if (message.getPacketID() != PacketIDs.ACK)
                 this.sentMessages.put(message.getMessageID(), message);
             byte[] data = message.getData().toByteArray();
             if (data.length > PACKET_SIZE)

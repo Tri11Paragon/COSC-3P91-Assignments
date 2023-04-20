@@ -94,6 +94,9 @@ public class GameDisplay {
                 "5. Print Village Stats\n"+
                 "6. Quit\n" +
                 "7. Attack last explored/generated\n" +
-                "8. Generate Village\033[0m\n");
+                "8. Generate Village\n" +
+                "9. Generate and Test Army\n" +
+                "0. Village Testing" +
+                "\033[0m\n");
     }
 }

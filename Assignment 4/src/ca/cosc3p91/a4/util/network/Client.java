@@ -34,7 +34,7 @@ public class Client implements Runnable {
         receiveThread = new Thread(this);
         receiveThread.start();
 
-        sendMessage(new Message.Sent(PacketTable.CONNECT, ourClientID, ++lastMessageID));
+        sendMessage(new Message.Sent(PacketIDs.CONNECT, ourClientID, ++lastMessageID));
 
         view.printGameMenu();
 
@@ -59,25 +59,31 @@ public class Client implements Runnable {
                 byte messageType;
                 switch (c) {
                     case '1':
-                        messageType = PacketTable.BUILD;
+                        messageType = PacketIDs.BUILD;
                         break;
                     case '2':
-                        messageType = PacketTable.TRAIN;
+                        messageType = PacketIDs.TRAIN;
                         break;
                     case '3':
-                        messageType = PacketTable.UPGRADE;
+                        messageType = PacketIDs.UPGRADE;
                         break;
                     case '4':
-                        messageType = PacketTable.EXPLORE;
+                        messageType = PacketIDs.EXPLORE;
                         break;
                     case '5':
-                        messageType = PacketTable.PRINT_MAP_DATA;
+                        messageType = PacketIDs.PRINT_MAP_DATA;
                         break;
                     case '7':
-                        messageType = PacketTable.ATTACK;
+                        messageType = PacketIDs.ATTACK;
                         break;
                     case '8':
-                        messageType = PacketTable.GENERATE;
+                        messageType = PacketIDs.GENERATE;
+                        break;
+                    case '9':
+                        messageType = PacketIDs.TEST_ARMY;
+                        break;
+                    case '0':
+                        messageType = PacketIDs.TEST_VILLAGE;
                         break;
                     default:
                         System.err.println("> Invalid command input!");
@@ -118,7 +124,7 @@ public class Client implements Runnable {
                 System.out.println("Receiving message with ID " + messageID + " from server of type " + packetID + " our ClientID " + clientID + " / " + ourClientID);
 
                 switch (packetID) {
-                    case PacketTable.ACK:
+                    case PacketIDs.ACK:
                         if (ourClientID == 0)
                             ourClientID = clientID;
                         Message.Sent message = sentMessages.get(messageID);
@@ -131,15 +137,15 @@ public class Client implements Runnable {
                         for (HashMap.Entry<Long, Message.Sent> ms : sentMessages.entrySet())
                             System.out.println("MessageID: " + ms.getKey());
                         break;
-                    case PacketTable.MESSAGE:
+                    case PacketIDs.MESSAGE:
                         System.out.println("\033[93m" + stream.readUTF() + "\033[0m");
                         break;
-                    case PacketTable.BEGIN_MAP_DATA:
+                    case PacketIDs.BEGIN_MAP_DATA:
                         expectedLines = stream.readInt();
                         currentLines = 0;
                         lineBuffer = new String[expectedLines];
                         break;
-                    case PacketTable.MAP_LINE_DATA:
+                    case PacketIDs.MAP_LINE_DATA:
                         int lineNumber = stream.readInt();
                         lineBuffer[lineNumber] = stream.readUTF();
                         currentLines++;
@@ -149,13 +155,13 @@ public class Client implements Runnable {
                             }
                         }
                         break;
-                    case PacketTable.DISCONNECT:
+                    case PacketIDs.DISCONNECT:
                         System.out.println("Disconnecting!");
                         running = false;
                         break;
                 }
-                if (packetID != PacketTable.ACK && packetID != PacketTable.DISCONNECT){
-                    sendMessage(new Message.Sent(PacketTable.ACK, ourClientID, messageID));
+                if (packetID != PacketIDs.ACK && packetID != PacketIDs.DISCONNECT){
+                    sendMessage(new Message.Sent(PacketIDs.ACK, ourClientID, messageID));
                 }
             } catch (Exception e){
                 e.printStackTrace();
@@ -164,7 +170,7 @@ public class Client implements Runnable {
     }
 
     private void sendMessage(Message.Sent message){
-        if (message.getPacketID() != PacketTable.ACK)
+        if (message.getPacketID() != PacketIDs.ACK)
             sentMessages.put(message.getMessageID(), message);
         byte[] data = message.getData().toByteArray();
         DatagramPacket sendPacket = new DatagramPacket(data, data.length, serverAddress, Server.SERVER_PORT);

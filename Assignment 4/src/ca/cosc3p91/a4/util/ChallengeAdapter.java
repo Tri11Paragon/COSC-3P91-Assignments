@@ -81,7 +81,7 @@ public class ChallengeAdapter {
         this.map = map;
     }
 
-    public boolean attack(Map enemy, Server.ConnectedClient client){
+    public boolean attack(Map enemy, boolean simulated, float pillageFactor, Server.ConnectedClient client){
         MapChallengeConverter enemyMap = new MapChallengeConverter(enemy);
         MapChallengeConverter ourMap = new MapChallengeConverter(this.map);
 
@@ -128,29 +128,38 @@ public class ChallengeAdapter {
         woodResults.print();
 
         CasaDeNarino th = map.getTownHall();
+        CasaDeNarino eth = enemy.getTownHall();
 
         AtomicInteger totalGold = new AtomicInteger();
         AtomicInteger totalIron = new AtomicInteger();
         AtomicInteger totalWood = new AtomicInteger();
 
-        goldResults.getLoot().forEach(r -> {
-            th.addGold((int)r.getProperty().doubleValue());
-            totalGold.addAndGet((int) r.getProperty().doubleValue());
-        });
+        if (!simulated) {
+            goldResults.getLoot().forEach(r -> {
+                int gold = (int) (r.getProperty() * pillageFactor);
+                th.addGold(gold);
+                eth.addGold(-gold);
+                totalGold.addAndGet(gold);
+            });
 
-        ironResults.getLoot().forEach(r -> {
-            th.addIron((int)r.getProperty().doubleValue());
-            totalIron.addAndGet((int) r.getProperty().doubleValue());
-        });
+            ironResults.getLoot().forEach(r -> {
+                int iron = (int) (r.getProperty() * pillageFactor);
+                th.addIron(iron);
+                eth.addIron(-iron);
+                totalIron.addAndGet(iron);
+            });
 
-        woodResults.getLoot().forEach(r -> {
-            th.addWood((int)r.getProperty().doubleValue());
-            totalWood.addAndGet((int) r.getProperty().doubleValue());
-        });
+            woodResults.getLoot().forEach(r -> {
+                int wood = (int) (r.getProperty() * pillageFactor);
+                th.addWood(wood);
+                eth.addWood(-wood);
+                totalWood.addAndGet(wood);
+            });
 
-        client.sendAndLogLn("You won gold: " + totalGold.get());
-        client.sendAndLogLn("You won iron: " + totalIron.get());
-        client.sendAndLogLn("You won wood: " + totalWood.get());
+            client.sendAndLogLn("You won gold: " + totalGold.get());
+            client.sendAndLogLn("You won iron: " + totalIron.get());
+            client.sendAndLogLn("You won wood: " + totalWood.get());
+        }
 
         return true;
     }

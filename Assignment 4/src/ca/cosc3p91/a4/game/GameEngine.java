@@ -29,7 +29,7 @@ public class GameEngine {
     public GameEngine() {
     }
 
-    public boolean attackVillage(Map attacking, Map defending, Server.ConnectedClient client) {
+    public boolean attackVillage(Map attacking, Map defending, boolean simulated, Server.ConnectedClient client) {
         int defenseiveCounter = 1;
         int inhabCounter = 0;
         for (Building b : defending.contains)
@@ -43,17 +43,8 @@ public class GameEngine {
             pillageFactor = 0;
         if (pillageFactor > 1)
             pillageFactor = 1;
-        int wood = (int) (defending.getTownHall().getCurrentWood() * pillageFactor);
-        int iron = (int) (defending.getTownHall().getCurrentIron() * pillageFactor);
-        int gold = (int) (defending.getTownHall().getCurrentGold() * pillageFactor);
-        attacking.getTownHall().addWood(wood);
-        attacking.getTownHall().addIron(iron);
-        attacking.getTownHall().addGold(gold);
-        defending.getTownHall().addWood(-wood);
-        defending.getTownHall().addIron(-iron);
-        defending.getTownHall().addGold(-gold);
         ChallengeAdapter adapter = new ChallengeAdapter(attacking);
-        return adapter.attack(defending, client);
+        return adapter.attack(defending, simulated, pillageFactor, client);
     }
 
     public Map generateInitialMap(){
