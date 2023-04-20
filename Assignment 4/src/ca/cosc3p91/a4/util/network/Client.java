@@ -101,7 +101,7 @@ public class Client implements Runnable {
                 long clientID = stream.readLong();
                 long messageID = stream.readLong();
 
-                System.out.println("Receiving message with ID " + messageID + " to client: " + clientID + " of type " + packetID);
+                System.out.println("Receiving message with ID " + messageID + " from server of type " + packetID + " our ClientID " + clientID + " / " + ourClientID);
 
                 switch (packetID) {
                     case PacketTable.ACK:

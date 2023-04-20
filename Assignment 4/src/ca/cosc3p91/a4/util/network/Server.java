@@ -10,6 +10,8 @@ import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 
 import java.util.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -23,7 +25,7 @@ public class Server implements Runnable {
     private long clientAssignmentID = 0;
     private final DatagramSocket socket;
     private final Thread ioThread;
-    private long lastSentMessageID = 0;
+//    private static volatile long lastSentMessageID = 0;
 
     private GameEngine mainEngine;
 
@@ -89,7 +91,7 @@ public class Server implements Runnable {
     private static class ConnectedClient implements Runnable {
         private final InetAddress address;
         private final int port;
-        private final Queue<Message.Received> pendingRequests = new PriorityQueue<>();
+        private final Queue<Message.Received> pendingRequests = new LinkedBlockingQueue<>();
         private final ReentrantLock requestLock = new ReentrantLock();
         private final AtomicBoolean allowUpdate;
         private final java.util.Map<Long, Message.Sent> sentMessages = Collections.synchronizedMap(new HashMap<>());
@@ -99,6 +101,7 @@ public class Server implements Runnable {
         private final Thread processingThread;
         private final Thread gameEngineThread;
         private final GameEngine usingEngine;
+        private long lastSentMessageID = 0;
         private final Map clientMap;
 
         public ConnectedClient(DatagramSocket serverSocket, GameEngine engine, long clientID, long messageID, InetAddress address, int port){
@@ -145,10 +148,14 @@ public class Server implements Runnable {
                         System.out.println(request.getReader().readUTF());
                         break;
                     case PacketTable.BUILD:
-                        if (usingEngine.build(clientMap, request.getReader().readUTF())){
-                            System.out.println("Client " + clientID + " has built something!");
-                        } else {
-                            System.out.println("Client " + clientID + " failed to build!");
+                        try {
+                            String type = request.getReader().readUTF().trim();
+                            if (usingEngine.build(clientMap, type))
+                                sendAndLogLn("Client " + clientID + " has successfully built " + type + "!");
+                            else
+                                sendAndLogLn("Client " + clientID + " has insufficient funds to build " + type + "!");
+                        } catch (GameEngine.BuildingErrorException e){
+                            sendAndLogLn(e.getMessage());
                         }
                         break;
                     case PacketTable.TRAIN:
@@ -157,8 +164,12 @@ public class Server implements Runnable {
                     case PacketTable.UPGRADE:
                         usingEngine.upgradeBuilding(clientMap, Integer.parseInt(request.getReader().readUTF()));
                         break;
+                    case PacketTable.PRINT_MAP_DATA:
+                        usingEngine.view.getVillageStateTable(clientMap, "Home Village").forEach(this::sendMessageLn);
+                        break;
                 }
-                sendMessage(new Message.Sent(PacketTable.ACK, clientID, request.getMessageID()));
+                if (request.getPacketID() != PacketTable.ACK)
+                    sendMessage(new Message.Sent(PacketTable.ACK, clientID, request.getMessageID()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -189,6 +200,22 @@ public class Server implements Runnable {
                     sentMessages.remove(l);
             }
         }
+
+        private void sendMessageLn(String str) {
+            Message.Sent mess = new Message.Sent(PacketTable.MESSAGE, clientID, ++lastSentMessageID);
+            try {
+                mess.getWriter().writeUTF(str + "\n");
+                sendMessage(mess);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        private void sendAndLogLn(String str){
+            sendMessageLn(str);
+            System.out.println(str);
+        }
+
 
         public void sendMessage(Message.Sent message){
             if (message.getPacketID() != PacketTable.ACK)

@@ -19,13 +19,13 @@ public class GameEngine {
     public static final double IRON_FACTOR = 1;
     public static final double WOOD_FACTOR = 0.1;
 
-    private float pillageFactor = 0.5f;
+    private final float pillageFactor = 0.5f;
 
     private int currentTime;
 
     private final Random random = new Random(System.nanoTime());
 
-    public GameDisplay view;
+    public GameDisplay view = new GameDisplay();
 
     public GameEngine() {
     }
@@ -147,11 +147,11 @@ public class GameEngine {
         }
     }
 
-    public synchronized boolean build (Map map, String buildingArg) {
+    public synchronized boolean build (Map map, String buildingArg) throws BuildingErrorException {
         BuildingFactory bfactory = new BuildingFactory();
         Building type = bfactory.getBuilding(buildingArg);
         if (type == null)
-            return false;
+            throw new BuildingErrorException("Invalid building type!");
         return map.build(new Tile(), type);
     }
 
@@ -278,6 +278,12 @@ public class GameEngine {
             System.out.println("Wrote map");
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public static class BuildingErrorException extends Exception {
+        public BuildingErrorException(String message){
+            super(message);
         }
     }
 

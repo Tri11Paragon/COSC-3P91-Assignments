@@ -9,10 +9,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class GameDisplay {
-    private BufferedReader reader;
+    private final BufferedReader reader;
     private String input;
 
     public GameDisplay() {
@@ -30,7 +31,7 @@ public class GameDisplay {
         System.out.println("\t->" + input + '\n');
     }
 
-    public void printVillageState(Map map, String displayName) {
+    public ArrayList<String> getVillageStateTable(Map map, String displayName){
         Print resourcesPrinter = new Print(displayName, 2);
 
         resourcesPrinter.addColumn(new Print.Column("Resource Type"));
@@ -73,7 +74,11 @@ public class GameDisplay {
         for (Inhabitant i : map.inhabitants)
             inhabs.addRow(new Print.Row(i.getClass().getSimpleName(), Integer.toString(i.getLevel() + 1)));
 
-        Print.print(inhabs.createTable(true, true, true));
+        return inhabs.createTable(true, true, true);
+    }
+
+    public void printVillageState(Map map, String displayName) {
+        Print.print(getVillageStateTable(map, displayName));
     }
 
     public void printGameMenu() {
