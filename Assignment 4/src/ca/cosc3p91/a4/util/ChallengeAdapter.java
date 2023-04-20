@@ -3,9 +3,11 @@ package ca.cosc3p91.a4.util;
 import ChallengeDecision.*;
 import ca.cosc3p91.a4.game.Map;
 import ca.cosc3p91.a4.gameobjects.*;
+import ca.cosc3p91.a4.util.network.Server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChallengeAdapter {
 
@@ -79,7 +81,7 @@ public class ChallengeAdapter {
         this.map = map;
     }
 
-    public void attack(Map enemy){
+    public boolean attack(Map enemy, Server.ConnectedClient client){
         MapChallengeConverter enemyMap = new MapChallengeConverter(enemy);
         MapChallengeConverter ourMap = new MapChallengeConverter(this.map);
 
@@ -116,28 +118,41 @@ public class ChallengeAdapter {
 
         // if any fail to attack we need to pretend like it was one big attack that failed
         if (!goldResults.getChallengeWon() || !ironResults.getChallengeWon() || !woodResults.getChallengeWon())
-            return;
+            return false;
 
-        System.out.println("We won gold: ");
+        System.out.print("We won gold: ");
         goldResults.print();
-        System.out.println("We won iron: ");
+        System.out.print("We won iron: ");
         ironResults.print();
-        System.out.println("We won wood: ");
+        System.out.print("We won wood: ");
         woodResults.print();
 
         CasaDeNarino th = map.getTownHall();
 
+        AtomicInteger totalGold = new AtomicInteger();
+        AtomicInteger totalIron = new AtomicInteger();
+        AtomicInteger totalWood = new AtomicInteger();
+
         goldResults.getLoot().forEach(r -> {
             th.addGold((int)r.getProperty().doubleValue());
+            totalGold.addAndGet((int) r.getProperty().doubleValue());
         });
 
         ironResults.getLoot().forEach(r -> {
             th.addIron((int)r.getProperty().doubleValue());
+            totalIron.addAndGet((int) r.getProperty().doubleValue());
         });
 
         woodResults.getLoot().forEach(r -> {
             th.addWood((int)r.getProperty().doubleValue());
+            totalWood.addAndGet((int) r.getProperty().doubleValue());
         });
+
+        client.sendAndLogLn("You won gold: " + totalGold.get());
+        client.sendAndLogLn("You won iron: " + totalIron.get());
+        client.sendAndLogLn("You won wood: " + totalWood.get());
+
+        return true;
     }
 
 }

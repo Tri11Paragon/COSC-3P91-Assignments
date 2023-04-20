@@ -88,7 +88,7 @@ public class Server implements Runnable {
         new Server();
     }
 
-    private static class ConnectedClient implements Runnable {
+    public static class ConnectedClient implements Runnable {
         private final InetAddress address;
         private final int port;
         private final Queue<Message.Received> pendingRequests = new LinkedBlockingQueue<>();
@@ -200,6 +200,10 @@ public class Server implements Runnable {
                     case PacketTable.EXPLORE:
                         Random rand = new Random();
                         int clients = server.clients.size();
+                        if (clients <= 1) {
+                            sendAndLogLn("No other clients are currently connected! Please generate a village!");
+                            break;
+                        }
                         int pos = rand.nextInt(clients);
                         while (pos == clientID)
                             pos = rand.nextInt(clients);
@@ -211,12 +215,13 @@ public class Server implements Runnable {
                         break;
                     case PacketTable.GENERATE:
                         exploringMap = usingEngine.generateMap(clientMap);
-                        sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Other Village"));
+                        sendMapData(usingEngine.view.getVillageStateTable(exploringMap, "Generated Village"));
                         break;
                     case PacketTable.ATTACK:
-                        if (exploringMap != null)
-                            usingEngine.attackVillage(clientMap, exploringMap);
-                        else
+                        if (exploringMap != null) {
+                            if (!usingEngine.attackVillage(clientMap, exploringMap, this))
+                                sendAndLogLn("Failed to attack!");
+                        } else
                             sendAndLogLn("Error: Explored map is null. Did you explored/generated last command?");
                         exploringMap = null;
                         break;
@@ -293,7 +298,7 @@ public class Server implements Runnable {
             }).start();
         }
 
-        private void sendAndLogLn(String str){
+        public void sendAndLogLn(String str){
             Message.Sent mess = new Message.Sent(PacketTable.MESSAGE, clientID, ++lastSentMessageID);
             try {
                 mess.getWriter().writeUTF(str + "\n");

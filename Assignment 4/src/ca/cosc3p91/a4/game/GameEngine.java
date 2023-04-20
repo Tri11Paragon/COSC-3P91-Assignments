@@ -6,6 +6,7 @@ import ca.cosc3p91.a4.gameobjects.factory.InhabitantFactory;
 import ca.cosc3p91.a4.player.*;
 import ca.cosc3p91.a4.userinterface.GameDisplay;
 import ca.cosc3p91.a4.util.ChallengeAdapter;
+import ca.cosc3p91.a4.util.network.Server;
 
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
@@ -19,8 +20,6 @@ public class GameEngine {
     public static final double IRON_FACTOR = 1;
     public static final double WOOD_FACTOR = 0.1;
 
-    private float pillageFactor = 0.5f;
-
     private int currentTime;
 
     private final Random random = new Random(System.nanoTime());
@@ -30,7 +29,7 @@ public class GameEngine {
     public GameEngine() {
     }
 
-    public void attackVillage(Map attacking, Map defending) {
+    public boolean attackVillage(Map attacking, Map defending, Server.ConnectedClient client) {
         int defenseiveCounter = 1;
         int inhabCounter = 0;
         for (Building b : defending.contains)
@@ -39,16 +38,22 @@ public class GameEngine {
         for (Inhabitant i : defending.inhabitants)
             if (i instanceof Infantry)
                 inhabCounter++;
-        pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
+        float pillageFactor = (float) inhabCounter / (float) defenseiveCounter;
         if (pillageFactor < 0)
             pillageFactor = 0;
         if (pillageFactor > 1)
             pillageFactor = 1;
-        attacking.getTownHall().addWood((int) (defending.getTownHall().getCurrentWood() * pillageFactor));
-        attacking.getTownHall().addIron((int) (defending.getTownHall().getCurrentIron() * pillageFactor));
-        attacking.getTownHall().addGold((int) (defending.getTownHall().getCurrentGold() * pillageFactor));
+        int wood = (int) (defending.getTownHall().getCurrentWood() * pillageFactor);
+        int iron = (int) (defending.getTownHall().getCurrentIron() * pillageFactor);
+        int gold = (int) (defending.getTownHall().getCurrentGold() * pillageFactor);
+        attacking.getTownHall().addWood(wood);
+        attacking.getTownHall().addIron(iron);
+        attacking.getTownHall().addGold(gold);
+        defending.getTownHall().addWood(-wood);
+        defending.getTownHall().addIron(-iron);
+        defending.getTownHall().addGold(-gold);
         ChallengeAdapter adapter = new ChallengeAdapter(attacking);
-        adapter.attack(defending);
+        return adapter.attack(defending, client);
     }
 
     public Map generateInitialMap(){
