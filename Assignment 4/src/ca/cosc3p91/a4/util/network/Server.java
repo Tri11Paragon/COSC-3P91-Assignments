@@ -83,10 +83,6 @@ public class Server implements Runnable {
         ioThread.join();
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
-        new Server();
-    }
-
     public static class ConnectedClient implements Runnable {
         private final InetAddress address;
         private final int port;
